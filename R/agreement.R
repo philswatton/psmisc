@@ -12,12 +12,13 @@ agreement <- function(x, values=NULL) {
 
   # Validate x
   if (!all(x %% 1 == 0 | is.na(x))) {
-    stop("Error: x should be atomic vector containing only integers")
+    stop("Error: input x should be atomic vector containing only integer values")
   }
+
 
   # Validate values
   if (!is.null(values) & !all(values %% 1 == 0 | is.na(values))) {
-    stop("Error: values should be NULL or atomic vector containing only integers")
+    stop("Error: input values should be NULL or atomic vector containing only integer values")
   }
 
 
@@ -28,13 +29,29 @@ agreement <- function(x, values=NULL) {
   n <- length(values)
 
 
-  # Empty frequency distribution
+  # Create empty frequency distribution
   dist <- data.frame(x = values, freq = replicate(n, 0))
+
 
   # Calculate frequencies
   for (i in values) {
     dist[dist$x == i, "freq"] <- sum(x == i, na.rm = T)
   }
+
+
+  # TODO: Break frequency dist into uniform layers
+
+
+  # TODO: calculate frequencies for each layer
+
+
+  # TODO: calculate binary equivalents for each layer (has/doesn't have values)
+
+
+  # TODO: calculate agreement for each layer
+
+
+  # TODO: aggregate agreement for layers, weighted by layer frequencies
 
 
   return(list(x, values, n, dist))
