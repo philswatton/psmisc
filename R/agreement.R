@@ -1,10 +1,6 @@
 agreement <- function(x, values=NULL) {
 
   # Function implementing Van der Eijk's Agreement
-  # Step 1: Convert input to frequency distribution
-  # Step 2: Decompose input ordinal distribution into 'layers' of uniform distributions
-  # Step 3: Calculate Agreement of each layer
-  # Step 4: calculate aggregated Agreement of overall distribution conditional
 
   # Arguments
   # x: Ordinal vector to input
@@ -103,12 +99,14 @@ agreement <- function(x, values=NULL) {
       }
     }
 
+
     # Calculate U
     if (TDU == 0 & TU == 0) {
       U <- 1
     } else {
       U <- ((K-2)*TU - (K-1)*TDU)/((K-2)*(TU+TDU))
     }
+
 
     # Add agreement of layer to A weighted by proportion
     A <- A + (U * (1 - (S - 1)/(K - 1)))*prop
