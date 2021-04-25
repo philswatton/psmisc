@@ -1,3 +1,12 @@
+#' Title
+#'
+#' @param x
+#' @param values
+#'
+#' @return double
+#' @export
+#'
+#' @examples
 agreement <- function(x, values=NULL) {
 
   # Function implementing Van der Eijk's Agreement
