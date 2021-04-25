@@ -1,9 +1,10 @@
 agreement <- function(x, values=NULL) {
 
   # Function implementing Van der Eijk's Agreement
-  # Step 1: Decompose input ordinal distribution into 'layers' of uniform distributions
-  # Step 2: Calculate Agreement of each layer
-  # Step 3: calculate aggregated Agreement of overall distribution conditional
+  # Step 1: Convert input to frequency distribution
+  # Step 2: Decompose input ordinal distribution into 'layers' of uniform distributions
+  # Step 3: Calculate Agreement of each layer
+  # Step 4: calculate aggregated Agreement of overall distribution conditional
 
   # Arguments
   # x: Ordinal vector to input
@@ -26,11 +27,18 @@ agreement <- function(x, values=NULL) {
   if (is.null(values)) {
     values <- unique(x)[!is.na(unique(x))]
   }
-  n <- length(values)
+  values <- sort(values)
+  K <- length(values)
+
+
+  # A only exists with three or more unique values
+  if (K < 3) {
+    stop("Error: Van der Ejik's agreement requires 3 or more unique values for calculation")
+  }
 
 
   # Create empty frequency distribution
-  dist <- data.frame(x = values, freq = replicate(n, 0))
+  dist <- data.frame(x = values, freq = replicate(K, 0))
 
 
   # Calculate frequencies
@@ -39,40 +47,78 @@ agreement <- function(x, values=NULL) {
   }
 
 
-  # TODO: Break frequency dist into uniform layers
+  # Initialise 'remainder'
+  r <- dist$freq
 
 
-  # TODO: calculate frequencies for each layer
+  # Total cases
+  tot <- sum(r)
 
 
-  # TODO: calculate binary equivalents for each layer (has/doesn't have values)
+  # Initialise agreement A
+  A <- 0
 
 
-  # TODO: calculate agreement for each layer
+  # Iteratively calculate agreement A
+  for (i in 1:K) {
+
+    # Check remainder is not empty
+    if (sum(r) == 0) break
+
+    # Create empty layer
+    layer <- replicate(length(r), 0)
+
+    # Get minimum non-zero value
+    m <- r[which.min(r[r > 0])]
+
+    # Fill up layer
+    layer[r > 0] <- m
+
+    # Remove from remainder
+    r[r > 0] <- r[r > 0] - m
+
+    # Break into pattern & proportion of cases, calculate S (n of non-empty columns)
+    pat <- as.numeric(layer > 0)
+    prop <- sum(layer)/tot
+    S <- sum(pat)
+
+    # Initialise TU and TDU
+    TDU <- 0
+    TU <- 0
+
+    # Calculate TU and TDU
+    for (i in 1:(K - 2)) {
+      for (j in (i + 1):(K - 1)) {
+        for (l in (j + 1):K) {
+
+          if (pat[i] == 1 & pat[j] == 1 & pat[l] == 0) {
+            TU <- TU + 1
+          } else if (pat[i] == 0 & pat[j] == 1 & pat[l] == 1) {
+            TU <- TU + 1
+          } else if (pat[i] == 1 & pat[j] == 0 & pat[l] == 1) {
+            TDU <- TDU + 1
+          }
+
+        }
+      }
+    }
+
+    # Calculate U
+    if (TDU == 0 & TU == 0) {
+      U <- 1
+    } else {
+      U <- ((K-2)*TU - (K-1)*TDU)/((K-2)*(TU+TDU))
+    }
+
+    # Add agreement of layer to A weighted by proportion
+    A <- A + (U * (1 - (S - 1)/(K - 1)))*prop
+  }
 
 
-  # TODO: aggregate agreement for layers, weighted by layer frequencies
-
-
-  return(list(x, values, n, dist))
+  return(A)
 
 }
 
 
 
 
-
-# Initial testing with simple vectors
-t1 <- c(1, 1, 1, 2, 5, 6, 1, 3, 4, 5, 6, 3, 4, 2, 7, 5, 7, 4, 1, 2)
-t2 <- c(1, NA, 1, 2, 5, 6, 1, 3, 4, 5, 6, 3, 4, 2, 7, 5, 7, 4, 1, 2)
-t3 <- c(1, NA, 1, 2, 5, 6, 1, 3, 4, 5, 6, 3, 4, 2, 6, 5, 6, 4, 1, 2)
-
-
-agreement(t1)
-agreement(t2)
-agreement(t3)
-agreement(t3, 1:7)
-agreement(t3, c(1:7,7))
-agreement(t3, c(1:7,NA))
-
-any(duplicated(c(1:7,7)))
