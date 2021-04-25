@@ -17,8 +17,8 @@ agreement <- function(x, values=NULL) {
 
 
   # Validate values
-  if (!is.null(values) & !all(values %% 1 == 0 | is.na(values))) {
-    stop("Error: input values should be NULL or atomic vector containing only integer values")
+  if (!is.null(values) & !all(values %% 1 == 0) | any(duplicated(values))) {
+    stop("Error: input values should be NULL or atomic vector containing only integer values with no duplicates")
   }
 
 
@@ -72,10 +72,7 @@ agreement(t1)
 agreement(t2)
 agreement(t3)
 agreement(t3, 1:7)
+agreement(t3, c(1:7,7))
+agreement(t3, c(1:7,NA))
 
-
-
-
-
-
-
+any(duplicated(c(1:7,7)))
