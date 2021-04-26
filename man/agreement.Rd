@@ -2,16 +2,18 @@
 % Please edit documentation in R/agreement.R
 \name{agreement}
 \alias{agreement}
-\title{Title}
+\title{Van der Ejik's Agreement}
 \usage{
 agreement(x, values = NULL)
 }
 \arguments{
-\item{values}{}
+\item{x}{Atomic vector containing integer values.}
+
+\item{values}{Atomic vector containing unique values of the input vector. Necessary if the vector contains 0 of a given value.}
 }
 \value{
 double
 }
 \description{
-Title
+An implementation of Van der Ejik's (2001) agreement coeficient show dispersion in an ordinal distribution. Ranges from -1 (complete polarisation) to 1 (complete agreement).
 }
