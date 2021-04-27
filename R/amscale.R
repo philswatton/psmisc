@@ -20,6 +20,9 @@ amscale <- function(x, respondent = NULL) {
     stop("Error: x should be data frame or matrix")
   }
 
+  # Get names
+  stimNames <- names(x)
+
   # If input is df, convert to matrix
   if (is.data.frame(x)) {
     x <- as.matrix(x)
@@ -46,6 +49,7 @@ amscale <- function(x, respondent = NULL) {
   if (!is.null(respondent)) {
     resp <- x[,respondent]
     x <- x[,-respondent]
+    stimNames <- stimNames[-respondent]
   }
 
 
@@ -60,11 +64,23 @@ amscale <- function(x, respondent = NULL) {
   # Filter x for complete cases
   mat <- x[complete.cases(x),]
 
-  # Calculate n (n of respondents with complete answers for the stimuli)
-  n <- nrow(mat)
+  # Calculate cc (n of respondents with complete answers for the stimuli)
+  cc <- nrow(mat)
+  n <- cc # total n of respondents
 
   # Break up into consituent Xi matrices
-  Xi <- lapply(1:n, function(i) matrix(c(replicate(q, 1), t(mat[i,])), nrow=q))
+  Xi <- lapply(1:cc, function(i) matrix(c(replicate(q, 1), t(mat[i,])), nrow=q))
+
+  # Check if respondent matrix is invertible
+  tests <- sapply(1:cc, function(i) class(try(solve(t(Xi[[i]]) %*% Xi[[i]]), silent=T))[1] == "matrix")
+
+  # Filter out respondents with non-invertible matrices
+  if (any(!tests)) {
+    Xi <- Xi[tests]
+    idvecCC <- idvecCC[tests]
+    n <- sum(tests)
+    warning(paste0(c(sum(!tests), " respondent matrices were not invertible.")))
+  }
 
 
 
@@ -83,20 +99,20 @@ amscale <- function(x, respondent = NULL) {
 
 
 
-  ## TODO: Step 4: Calculate result
+  ## Step 4: Calculate result
 
   # Calculate Eigenvalues and eigenvectors
-  # eig <- eigen(AnI)
+  eig <- eigen(AnI)
 
   # get index of highest negative nonzero eigenvalue
-  # index <- which.min(replace(eig$values, eig$values >= 0, NA))
+  index <- which.min(replace(eig$values, eig$values >= 0, NA))
 
   # get value of highest negative nonzero eigenvalue (for calculation of model fit)
-  # e2 <- eig$values[index] # note this correspondents to -1* sum of squared errors
+  e2 <- eig$values[index] # note this correspondents to -1* sum of squared errors
 
   # get stimuli
-  # stimuli <- eig$vectors[,index]
-  # names(stimuli) <- names(x)
+  stimuli <- eig$vectors[,index]
+  names(stimuli) <- stimNames
 
 
 
@@ -117,8 +133,10 @@ amscale <- function(x, respondent = NULL) {
 
 
   # return(list(A, I, AnI, index, stimuli))
-  return(list(Xi, A, AnI))
+  # return(list(Xi, A, AnI))
+  # return(eig)
   # return(stimuli)
+  return(list(n, stimuli))
 
 }
 
@@ -136,12 +154,28 @@ mat <- eesMat[complete.cases(eesMat),]
 n <- nrow(mat)
 q <- 6
 
+i <- 1
+i <- 680
+
 
 Xi <- lapply(1:n, function(i) matrix(c(replicate(q, 1), t(mat[i,])), nrow=q))
 
+
+# Check if respondent matrix is invertible
+tests <- sapply(1:n, function(i) class(try(solve(t(Xi[[i]]) %*% Xi[[i]]), silent=T))[1] == "matrix")
+
+
+class(try(solve(t(Xi[[i]]) %*% Xi[[i]]), silent=T))[1] == "matrix"
+
+
 temp <- lapply(1:n, function(i) Xi[[i]] %*% ((t(Xi[[i]]) %*% Xi[[i]])^-1) %*% t(Xi[[i]]))
 
-Reduce('+', temp)
+lapply(1:n, function(i) try(solve(t(Xi[[i]]) %*% Xi[[i]])))
+
+
+
+
+
 
 Reduce('+', lapply(1:n, function(i) Xi[[i]] %*% ((t(Xi[[i]]) %*% Xi[[i]])^-1) %*% t(Xi[[i]])))
 
@@ -159,7 +193,7 @@ is.na(temp2)
 
 
 temp2[sapply(1:n, function(i) any(is.na(temp2[i,]))),]
-
+temp2[sapply(1:n, function(i) any(is.nan(temp2[i,]))),]
 
 
 any(is.na(temp2))
@@ -169,8 +203,11 @@ apply(simplify2array(temp), c(1,2), sum)
 
 eigen(AnI)
 
-# compare <- basicspace::aldmck(eesMat, polarity=2)
+# ?basicspace::aldmck
+# compare <- basicspace::aldmck(ees, respondent=1, polarity=2, verbose=T)
 compare$stimuli
+# 1000 - sum(is.na(compare$respondents$intercept))
+
 
 
 amscale(ees, respondent = 1)
@@ -182,3 +219,13 @@ stim <- amscale(eesMat)
 names(stim) <- names(eesMat)
 stim
 
+
+
+
+test <- matrix(c(1,0,0,0,1,0,0,0,0), ncol=3)
+solve(test)
+is.na(test^-1)
+
+is.in
+
+Xi[tests]
