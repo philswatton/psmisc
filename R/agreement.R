@@ -76,7 +76,7 @@ agreement <- function(x, values=NULL) {
     layer <- replicate(length(r), 0)
 
     # Get minimum non-zero value
-    m <- r[which.min(r[r > 0])]
+    m <- r[which.min(replace(r, r == 0, NA))]
 
     # Fill up layer
     layer[r > 0] <- m
