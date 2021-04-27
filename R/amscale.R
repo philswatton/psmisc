@@ -1,4 +1,4 @@
-amscale <- function(x, respondent = NULL) {
+amscale <- function(x, respindex = NULL) {
 
   # Function implementing Aldrich-McKlevey Scaling
 
@@ -40,16 +40,17 @@ amscale <- function(x, respondent = NULL) {
   q <- ncol(x)
 
   # If provided, validate respondent index
-  if (!is.null(respondent)) {
-    if (respondent %% 1 != 0 | length(respondent) != 1)
+  if (!is.null(respindex)) {
+    if (respindex %% 1 != 0 | length(respindex) != 1)
     stop("Error: Respondent index should be a single integer value giving the location of the respondent self placements in the input")
   }
 
   # If respondent placements provided, partition into respondent & stimuli matrices
-  if (!is.null(respondent)) {
-    resp <- x[,respondent]
-    x <- x[,-respondent]
-    stimNames <- stimNames[-respondent]
+  if (!is.null(respindex)) {
+    resp <- x[respindex]
+    x <- x[,-respindex]
+    stimNames <- stimNames[-respindex]
+    q <- q - 1
   }
 
 
@@ -101,42 +102,59 @@ amscale <- function(x, respondent = NULL) {
 
   ## Step 4: Calculate result
 
-  # Calculate Eigenvalues and eigenvectors
+  # Calculate eigenvalues and eigenvectors
   eig <- eigen(AnI)
 
-  # get index of highest negative nonzero eigenvalue
-  index <- which.min(replace(eig$values, eig$values >= 0, NA))
-
   # get value of highest negative nonzero eigenvalue (for calculation of model fit)
-  e2 <- eig$values[index] # note this correspondents to -1* sum of squared errors
+  e2 <- -eig$values[q] # note the eigenvalue correspondents to -1* sum of squared errors
 
   # get stimuli
-  stimuli <- eig$vectors[,index]
+  stimuli <- eig$vectors[,q]
   names(stimuli) <- stimNames
 
 
 
-  ## TODO: Step 5: Calculate model fit
+
+  ## Step 5: Calculate model fit
+  fit <- (n * e2)/(q*(n + e2)^2)
 
 
 
 
-  ## TODO: Step 6: Calculate respondent intercepts & weights
+  ## Step 6: Calculate respondent intercepts & weights
+
+  # Calculate
+  solutions <- lapply(1:n, function(i) ((t(Xi[[i]]) %*% Xi[[i]])^-1) %*% t(Xi[[i]]) %*% stimuli)
+  intercept <- sapply(1:n, function(i) solutions[[i]][1])
+  weight <- sapply(1:n, function(i) solutions[[i]][2])
+
+  # Put into DF same length as inputs
+  respondent <- data.frame(idvec)
+  solution <- data.frame(idvecCC, intercept, weight)
+  respondent <- merge(respondent, solution, by.x = "idvec", by.y = "idvecCC", all.x=T, all.y=F)
+
+  # Finalise by removing idvec
+  respondent <- respondent[2:3]
+
+
+
+  ## Step 7: Calculate ideal points
+
+  if (!is.null(respindex)) {
+    respondent$selfplace <- resp
+    respondent$idealpt <- respondent$intercept + respondent$weight * respondent$selfplace
+  }
 
 
 
 
-  ## TODO: Step 7: Calculate result
+  ## Return
 
+  # Return list
+  # return(list(stimuli, respondent, fit))
 
-
-
-
-  # return(list(A, I, AnI, index, stimuli))
-  # return(list(Xi, A, AnI))
-  # return(eig)
-  # return(stimuli)
-  return(list(n, stimuli))
+  # Debugging list
+  return(list(stimuli, A, AnI, eig))
 
 }
 
@@ -151,57 +169,44 @@ names(ees) <- c("lrSelf","lrCon","lrLab","lrLD","lrGreen","lrUKIP","lrBXP")
 eesMat <- ees[2:7]
 
 mat <- eesMat[complete.cases(eesMat),]
-n <- nrow(mat)
-q <- 6
+cc <- nrow(mat)
+q <- ncol(mat)
 
 i <- 1
-i <- 680
+# i <- 680
 
-
-Xi <- lapply(1:n, function(i) matrix(c(replicate(q, 1), t(mat[i,])), nrow=q))
-
+# Get respondent matrices
+Xi <- lapply(1:cc, function(i) matrix(c(replicate(q, 1), t(mat[i,])), nrow=q))
 
 # Check if respondent matrix is invertible
-tests <- sapply(1:n, function(i) class(try(solve(t(Xi[[i]]) %*% Xi[[i]]), silent=T))[1] == "matrix")
+tests <- sapply(1:cc, function(i) class(try(solve(t(Xi[[i]]) %*% Xi[[i]]), silent=T))[1] == "matrix")
 
+# Filter
+Xi <- Xi[tests]
+n <- sum(tests)
 
-class(try(solve(t(Xi[[i]]) %*% Xi[[i]]), silent=T))[1] == "matrix"
-
-
-temp <- lapply(1:n, function(i) Xi[[i]] %*% ((t(Xi[[i]]) %*% Xi[[i]])^-1) %*% t(Xi[[i]]))
-
-lapply(1:n, function(i) try(solve(t(Xi[[i]]) %*% Xi[[i]])))
-
-
-
-
-
-
+# Sum matrices
 Reduce('+', lapply(1:n, function(i) Xi[[i]] %*% ((t(Xi[[i]]) %*% Xi[[i]])^-1) %*% t(Xi[[i]])))
 
+# Calculate A
 A <- Reduce('+', lapply(1:n, function(i) Xi[[i]] %*% ((t(Xi[[i]]) %*% Xi[[i]])^-1) %*% t(Xi[[i]])))
 
+# Calculate A - n*I
 AnI <- (A - (n * diag(q)))
 
-
-
-
-temp2 <- Reduce('rbind', temp)
-
-is.na(temp2)
-
-
-
-temp2[sapply(1:n, function(i) any(is.na(temp2[i,]))),]
-temp2[sapply(1:n, function(i) any(is.nan(temp2[i,]))),]
-
-
-any(is.na(temp2))
-
-apply(simplify2array(temp), c(1,2), sum)
-
-
+# Get eigenvalues and eigenvectors
 eigen(AnI)
+eig <- eigen(AnI)
+
+# Get stims
+stimuli <- eig$vectors[,q]
+
+# Resp
+solutions <- lapply(1:n, function(i) ((t(Xi[[i]]) %*% Xi[[i]])^-1) %*% t(Xi[[i]]) %*% stimuli)
+intercept <- sapply(1:n, function(i) solutions[[i]][1])
+weight <- sapply(1:n, function(i) solutions[[i]][2])
+
+
 
 # ?basicspace::aldmck
 # compare <- basicspace::aldmck(ees, respondent=1, polarity=2, verbose=T)
@@ -210,22 +215,17 @@ compare$stimuli
 
 
 
+
+
+
 amscale(ees, respondent = 1)
 amscale(eesMat)
-
-
-
-stim <- amscale(eesMat)
-names(stim) <- names(eesMat)
-stim
+amscale(eesMat[1:4])
 
 
 
 
-test <- matrix(c(1,0,0,0,1,0,0,0,0), ncol=3)
-solve(test)
-is.na(test^-1)
 
-is.in
+head(mat)
+Xi[[i]]
 
-Xi[tests]
