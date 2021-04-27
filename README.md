@@ -6,5 +6,5 @@ This is a work-in-progress package that contains miscellaneous functions for dat
 
 You can install this package by running the following code in R:
 
-library(devtools)
+library(devtools)  
 install_github("philswatton/philspackage")
