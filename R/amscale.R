@@ -9,7 +9,8 @@
 #'
 #'         stimuli contains a double vector of the scaled stimuli.
 #'
-#'         respondent is a dataframe of the same length of the input containing respondent intercepts, weights; and if respindex was specified self-placements and ideal points.
+#'         respondent is a dataframe of the same length of the input containing respondent
+#'         intercepts, weights; and if respindex was specified self-placements and ideal points.
 #'
 #'         fit is a single value for AM's fit statistic for the model.
 #'
@@ -160,7 +161,7 @@ amscale <- function(x, respindex = NULL) {
 
   if (!is.null(respindex)) {
     respondent$selfplace <- resp
-    respondent$idealpt <- respondent$intercept + respondent$weight * respondent$selfplace
+    respondent$idealpt <- respondent$intercept + (respondent$weight * respondent$selfplace)
   }
 
 
