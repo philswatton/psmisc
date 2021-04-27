@@ -13,7 +13,7 @@ amscale <- function(x, respondent = NULL) {
 
 
 
-  ## Step 1
+  ## Step 1: Validate and prepare input
 
   # Validate input is a df or matrix
   if (!is.matrix(x) & !is.data.frame(x)) {
@@ -50,7 +50,7 @@ amscale <- function(x, respondent = NULL) {
 
 
 
-  ## Step 2
+  ## Step 2: Prepare Xi matrices
 
   # Create id vector to facilitate keeping output respondents df to the same size of the original
   idvec <- 1:N
@@ -61,6 +61,37 @@ amscale <- function(x, respondent = NULL) {
 
   # Calculate n (n of respondents with complete answers for the stimuli)
   n <- nrow(mat)
+
+  # Break up into consituent Xi matrices
+  Xi <- lapply(1:n, function(i) matrix(c(replicate(q, 1), t(mat[i,])), nrow=q))
+
+
+
+
+  ## Step 3: Calculate A
+
+  # Calculate A
+  A <- Reduce('+', lapply(1:n, function(i) Xi[[1]] %*% ((t(Xi[[1]]) %*% Xi[[1]])^-1) %*% t(Xi[[1]])))
+
+
+
+
+  ## TODO: Step 4: Calculate result
+
+
+
+
+  ## TODO: Step 5: Calculate model fit
+
+
+
+
+  ## TODO: Step 6: Calculate respondent intercepts & weights
+
+
+
+
+  ## TODO: Step 7: Calculate result
 
 
 
@@ -79,13 +110,21 @@ names(ees) <- c("lrSelf","lrCon","lrLab","lrLD","lrGreen","lrUKIP","lrBXP")
 
 # Version w/out Self placements
 eesMat <- ees[2:7]
-n <- 1000
+
+mat <- eesMat[complete.cases(eesMat),]
+n <- nrow(mat)
 q <- 6
 
 
-lapply(1:n, function(z) matrix(c(replicate(q, 1), t(eesMat[z,])), nrow=6))
+Xi <- lapply(1:n, function(i) matrix(c(replicate(q, 1), t(mat[i,])), nrow=q))
 
-Xi <- matrix(c(replicate(q, 1), t(eesMat[3,])), nrow=6)
+lapply(1:n, function(i) Xi[[1]] %*% ((t(Xi[[1]]) %*% Xi[[1]])^-1) %*% t(Xi[[1]]))
+
+Reduce('+', lapply(1:n, function(i) Xi[[1]] %*% ((t(Xi[[1]]) %*% Xi[[1]])^-1) %*% t(Xi[[1]])))
+
+Xi[[1]] %*% ((t(Xi[[1]]) %*% Xi[[1]])^-1) %*% t(Xi[[1]])
+
+
 
 
 amscale(matrix(c("Hello")))
