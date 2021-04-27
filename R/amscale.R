@@ -37,14 +37,15 @@ amscale <- function(x, respondent = NULL) {
   q <- ncol(x)
 
   # If provided, validate respondent index
-  if (!is.null(respondent) & (respondent %% 1 != 0 | length(respondent) != 1)) {
+  if (!is.null(respondent)) {
+    if (respondent %% 1 != 0 | length(respondent) != 1)
     stop("Error: Respondent index should be a single integer value giving the location of the respondent self placements in the input")
   }
 
   # If respondent placements provided, partition into respondent & stimuli matrices
   if (!is.null(respondent)) {
-    resp <- x[respondent]
-    x <- x[-respondent]
+    resp <- x[,respondent]
+    x <- x[,-respondent]
   }
 
 
@@ -68,16 +69,34 @@ amscale <- function(x, respondent = NULL) {
 
 
 
-  ## Step 3: Calculate A
+  ## Step 3: Calculate A, I, (A - nI)
 
   # Calculate A
-  A <- Reduce('+', lapply(1:n, function(i) Xi[[1]] %*% ((t(Xi[[1]]) %*% Xi[[1]])^-1) %*% t(Xi[[1]])))
+  A <- Reduce('+', lapply(1:n, function(i) Xi[[i]] %*% ((t(Xi[[i]]) %*% Xi[[i]])^-1) %*% t(Xi[[i]])))
+
+  # Calculate I_q
+  I <- diag(q)
+
+  # Calculate A - nI
+  AnI <- A - (n * I)
 
 
 
 
   ## TODO: Step 4: Calculate result
 
+  # Calculate Eigenvalues and eigenvectors
+  # eig <- eigen(AnI)
+
+  # get index of highest negative nonzero eigenvalue
+  # index <- which.min(replace(eig$values, eig$values >= 0, NA))
+
+  # get value of highest negative nonzero eigenvalue (for calculation of model fit)
+  # e2 <- eig$values[index] # note this correspondents to -1* sum of squared errors
+
+  # get stimuli
+  # stimuli <- eig$vectors[,index]
+  # names(stimuli) <- names(x)
 
 
 
@@ -97,7 +116,9 @@ amscale <- function(x, respondent = NULL) {
 
 
 
-  return(x)
+  # return(list(A, I, AnI, index, stimuli))
+  return(list(Xi, A, AnI))
+  # return(stimuli)
 
 }
 
@@ -118,19 +139,46 @@ q <- 6
 
 Xi <- lapply(1:n, function(i) matrix(c(replicate(q, 1), t(mat[i,])), nrow=q))
 
-lapply(1:n, function(i) Xi[[1]] %*% ((t(Xi[[1]]) %*% Xi[[1]])^-1) %*% t(Xi[[1]]))
+temp <- lapply(1:n, function(i) Xi[[i]] %*% ((t(Xi[[i]]) %*% Xi[[i]])^-1) %*% t(Xi[[i]]))
 
-Reduce('+', lapply(1:n, function(i) Xi[[1]] %*% ((t(Xi[[1]]) %*% Xi[[1]])^-1) %*% t(Xi[[1]])))
+Reduce('+', temp)
 
-Xi[[1]] %*% ((t(Xi[[1]]) %*% Xi[[1]])^-1) %*% t(Xi[[1]])
+Reduce('+', lapply(1:n, function(i) Xi[[i]] %*% ((t(Xi[[i]]) %*% Xi[[i]])^-1) %*% t(Xi[[i]])))
 
+A <- Reduce('+', lapply(1:n, function(i) Xi[[i]] %*% ((t(Xi[[i]]) %*% Xi[[i]])^-1) %*% t(Xi[[i]])))
 
-
-
-amscale(matrix(c("Hello")))
-
-ees[-1]
+AnI <- (A - (n * diag(q)))
 
 
-complete.cases(eesMat)
+
+
+temp2 <- Reduce('rbind', temp)
+
+is.na(temp2)
+
+
+
+temp2[sapply(1:n, function(i) any(is.na(temp2[i,]))),]
+
+
+
+any(is.na(temp2))
+
+apply(simplify2array(temp), c(1,2), sum)
+
+
+eigen(AnI)
+
+# compare <- basicspace::aldmck(eesMat, polarity=2)
+compare$stimuli
+
+
+amscale(ees, respondent = 1)
+amscale(eesMat)
+
+
+
+stim <- amscale(eesMat)
+names(stim) <- names(eesMat)
+stim
 
