@@ -1,3 +1,21 @@
+#' Aldrich-McKlevey Scaling
+#'
+#' An implementation of Aldrich-McKlevey's (1968) scaling method for perceptual data.
+#'
+#' @param x A dataframe or matrix containing integer values of respondent placements of stimuli.
+#' @param respindex An optional integer giving the column index of respondent self-placements.
+#'
+#' @return A list containing three objects.
+#'
+#'         stimuli contains a double vector of the scaled stimuli.
+#'
+#'         respondent is a dataframe of the same length of the input containing respondent intercepts, weights; and if respindex was specified self-placements and ideal points.
+#'
+#'         fit is a single value for AM's fit statistic for the model.
+#'
+#' @export
+#'
+#' @examples
 amscale <- function(x, respindex = NULL) {
 
   # Function implementing Aldrich-McKlevey Scaling
@@ -151,81 +169,10 @@ amscale <- function(x, respindex = NULL) {
   ## Return
 
   # Return list
-  # return(list(stimuli, respondent, fit))
+  return(list(stimuli, respondent, fit))
 
   # Debugging list
-  return(list(stimuli, A, AnI, eig))
+  # return(list(stimuli, A, AnI, eig))
 
 }
-
-
-# Full EES to Scale
-ees <- readRDS("C:/Users/User/Documents/Research/scalingExploration/data/ees2019.rds")
-ees <- ees[ees$country=="United Kingdom",2:8]
-names(ees) <- c("lrSelf","lrCon","lrLab","lrLD","lrGreen","lrUKIP","lrBXP")
-
-
-# Version w/out Self placements
-eesMat <- ees[2:7]
-
-mat <- eesMat[complete.cases(eesMat),]
-cc <- nrow(mat)
-q <- ncol(mat)
-
-i <- 1
-# i <- 680
-
-# Get respondent matrices
-Xi <- lapply(1:cc, function(i) matrix(c(replicate(q, 1), t(mat[i,])), nrow=q))
-
-# Check if respondent matrix is invertible
-tests <- sapply(1:cc, function(i) class(try(solve(t(Xi[[i]]) %*% Xi[[i]]), silent=T))[1] == "matrix")
-
-# Filter
-Xi <- Xi[tests]
-n <- sum(tests)
-
-# Sum matrices
-Reduce('+', lapply(1:n, function(i) Xi[[i]] %*% ((t(Xi[[i]]) %*% Xi[[i]])^-1) %*% t(Xi[[i]])))
-
-# Calculate A
-A <- Reduce('+', lapply(1:n, function(i) Xi[[i]] %*% ((t(Xi[[i]]) %*% Xi[[i]])^-1) %*% t(Xi[[i]])))
-
-# Calculate A - n*I
-AnI <- (A - (n * diag(q)))
-
-# Get eigenvalues and eigenvectors
-eigen(AnI)
-eig <- eigen(AnI)
-
-# Get stims
-stimuli <- eig$vectors[,q]
-
-# Resp
-solutions <- lapply(1:n, function(i) ((t(Xi[[i]]) %*% Xi[[i]])^-1) %*% t(Xi[[i]]) %*% stimuli)
-intercept <- sapply(1:n, function(i) solutions[[i]][1])
-weight <- sapply(1:n, function(i) solutions[[i]][2])
-
-
-
-# ?basicspace::aldmck
-# compare <- basicspace::aldmck(ees, respondent=1, polarity=2, verbose=T)
-compare$stimuli
-# 1000 - sum(is.na(compare$respondents$intercept))
-
-
-
-
-
-
-amscale(ees, respondent = 1)
-amscale(eesMat)
-amscale(eesMat[1:4])
-
-
-
-
-
-head(mat)
-Xi[[i]]
 
