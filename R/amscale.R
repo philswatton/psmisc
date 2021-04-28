@@ -108,7 +108,7 @@ amscale <- function(x, respindex = NULL) {
   ## Step 3: Calculate A, I, (A - nI)
 
   # Calculate A
-  A <- Reduce('+', lapply(1:n, function(i) Xi[[i]] %*% ((t(Xi[[i]]) %*% Xi[[i]])^-1) %*% t(Xi[[i]])))
+  A <- Reduce('+', lapply(1:n, function(i) Xi[[i]] %*% solve(t(Xi[[i]]) %*% Xi[[i]]) %*% t(Xi[[i]])))
 
   # Calculate I_q
   I <- diag(q)
@@ -143,7 +143,7 @@ amscale <- function(x, respindex = NULL) {
   ## Step 6: Calculate respondent intercepts & weights
 
   # Calculate
-  solutions <- lapply(1:n, function(i) ((t(Xi[[i]]) %*% Xi[[i]])^-1) %*% t(Xi[[i]]) %*% stimuli)
+  solutions <- lapply(1:n, function(i) solve(t(Xi[[i]]) %*% Xi[[i]]) %*% t(Xi[[i]]) %*% stimuli)
   intercept <- sapply(1:n, function(i) solutions[[i]][1])
   weight <- sapply(1:n, function(i) solutions[[i]][2])
 
@@ -176,4 +176,3 @@ amscale <- function(x, respindex = NULL) {
   # return(list(stimuli, A, AnI, eig))
 
 }
-
