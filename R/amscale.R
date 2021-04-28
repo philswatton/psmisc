@@ -19,7 +19,7 @@
 #' @export
 #'
 #' @examples
-amscale <- function(x, respindex = NULL, polarity=NULL, iter=500) {
+amscale <- function(x, respindex = NULL, polarity=NULL, iter=1000) {
 
   # Function implementing Aldrich-McKlevey Scaling
 
