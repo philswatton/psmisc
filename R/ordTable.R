@@ -1,7 +1,7 @@
 #' Title Table of Summary Statistics for Ordinal Data
 #'
 #' @param data Dataframe containing the desired variables.
-#' @param vars Character (preferred) or numeric vector containing integers naming/indexing (respectively) the columns containing the ordinal variables you wish to summarise.
+#' @param vars Character or numeric vector containing integers naming or indexing the columns containing the ordinal variables you wish to summarise.
 #' @param values NOT YET IMPLEMENTED
 #'
 #' @return A dataframe containing the median, Van der Ejik's agreement statistic, min, 25th quantile, 75th quantile, max, N.

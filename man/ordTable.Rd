@@ -9,7 +9,7 @@ ordTable(data, vars, values = NULL)
 \arguments{
 \item{data}{Dataframe containing the desired variables.}
 
-\item{vars}{Character (preferred) or numeric vector containing integers naming/indexing (respectively) the columns containing the ordinal variables you wish to summarise.}
+\item{vars}{Character or numeric vector containing integers naming or indexing the columns containing the ordinal variables you wish to summarise.}
 
 \item{values}{NOT YET IMPLEMENTED}
 }
