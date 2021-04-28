@@ -4,8 +4,10 @@
 #'
 #' @param x A dataframe or matrix containing integer values of respondent placements of stimuli.
 #' @param respindex An optional integer giving the column index of respondent self-placements.
+#' @param polarity An optional integer giving the column index of a stimulus you wish to be positive in value. All stimuli will be calculated in relation to this declaration.
+#' @param iter To calculate the true stimuli values, amscale() uses matlib's Eigen() function, which uses iterative QR decomposition. Set the max number of iterations via this parameter.
 #'
-#' @return A list containing three objects.
+#' @return A list containing four objects.
 #'
 #'         stimuli contains a double vector of the scaled stimuli.
 #'
@@ -17,7 +19,7 @@
 #' @export
 #'
 #' @examples
-amscale <- function(x, respindex = NULL) {
+amscale <- function(x, respindex = NULL, polarity=NULL, iter=500) {
 
   # Function implementing Aldrich-McKlevey Scaling
 
@@ -28,6 +30,16 @@ amscale <- function(x, respindex = NULL) {
   # Step 5: Calculate model fit
   # Step 6: Calculate respondent intercepts & weights
   # Step 7: If respondent self-placements provided, convert to respondent ideal points using intercepts & weights
+
+
+
+
+  # TODO:
+  # - Write validation for polarity input
+  # - Allow users to just stick in a full data frame and specify which columns they want to scale
+  # - Consider replacing the use of solve() for other methods of calculating inverses - e.g. QR decomposition
+  # - Write summary() method
+  # - Complete the output
 
 
 
@@ -122,14 +134,26 @@ amscale <- function(x, respindex = NULL) {
   ## Step 4: Calculate result
 
   # Calculate eigenvalues and eigenvectors
-  eig <- eigen(AnI)
+  # eig <- eigen(AnI)
+  eig <- matlib::Eigen(AnI, max.iter = iter)
+
+  # Calculate index for highest negative nonzero eigenvalue
+  index <- which.max(replace(eigenvalues, eigenvalues >= 0, NA))
 
   # get value of highest negative nonzero eigenvalue (for calculation of model fit)
-  e2 <- -eig$values[q] # note the eigenvalue correspondents to -1* sum of squared errors
+  e2 <- -eig$values[index] # note the eigenvalue correspondents to -1* sum of squared errors
 
   # get stimuli
-  stimuli <- eig$vectors[,q]
+  stimuli <- eig$vectors[,index]
   names(stimuli) <- stimNames
+
+  # if a polarity has been specified, ensure stimuli are positive
+  if (!is.null(polarity)) {
+    if (stimuli[polarity] < 0) {
+      stimuli <- -stimuli
+    }
+  }
+
 
 
 
@@ -170,7 +194,12 @@ amscale <- function(x, respindex = NULL) {
   ## Return
 
   # Return list
-  return(list(stimuli, respondent, fit))
+  out <- list()
+  out$stimuli <- stimuli
+  out$respondents <- respondent
+  out$eigenvalues <- eigenvalues
+  out$fit <- fit
+  return(out)
 
   # Debugging list
   # return(list(stimuli, A, AnI, eig))
