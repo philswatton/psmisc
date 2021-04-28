@@ -1,3 +1,13 @@
+#' Title Table of Summary Statistics for Ordinal Data
+#'
+#' @param data Dataframe containing the desired variables.
+#' @param vars Character (preferred) or numeric vector containing integers naming/indexing (respectively) the columns containing the ordinal variables you wish to summarise.
+#' @param values NOT YET IMPLEMENTED
+#'
+#' @return A dataframe containing the median, Van der Ejik's agreement statistic, min, 25th quantile, 75th quantile, max, N.
+#' @export
+#'
+#' @examples
 ordTable <- function(data, vars, values=NULL) {
 
   # Function for producing descriptive stat tables of ordinal data
@@ -12,6 +22,8 @@ ordTable <- function(data, vars, values=NULL) {
   # - Allow the user to specify which columns to report <- this will probably take the most work
   # - Consider implementing other measures of ordinal dispersion in the package to allow the user to choose which to report
   # - Search for other ordinal-specific measures
+
+
 
   # Initialise for first variable
   vec <- data[vars[1]][[1]]

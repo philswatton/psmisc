@@ -21,5 +21,5 @@ A list containing three objects.\preformatted{    stimuli contains a double vect
 }
 }
 \description{
-An implementation of Aldrich-McKlevey's (1968) scaling method for perceptual data.
+An implementation of Aldrich-McKlevey's (1977) scaling method for perceptual data.
 }
