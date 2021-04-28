@@ -4,12 +4,19 @@
 \alias{ordTable}
 \title{Title Table of Summary Statistics for Ordinal Data}
 \usage{
-ordTable(data, vars, values = NULL)
+ordTable(
+  data,
+  vars,
+  compute = c("median", "agreement", "min", "25q", "75q", "max", "N"),
+  values = NULL
+)
 }
 \arguments{
 \item{data}{Dataframe containing the desired variables.}
 
 \item{vars}{Character or numeric vector containing integers naming or indexing the columns containing the ordinal variables you wish to summarise.}
+
+\item{compute}{Character vector instructing ordTable which descriptive statistics to calculate}
 
 \item{values}{NOT YET IMPLEMENTED}
 }
