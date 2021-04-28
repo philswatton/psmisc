@@ -1,6 +1,6 @@
 #' Aldrich-McKlevey Scaling
 #'
-#' An implementation of Aldrich-McKlevey's (1968) scaling method for perceptual data.
+#' An implementation of Aldrich-McKlevey's (1977) scaling method for perceptual data.
 #'
 #' @param x A dataframe or matrix containing integer values of respondent placements of stimuli.
 #' @param respindex An optional integer giving the column index of respondent self-placements.
@@ -40,7 +40,7 @@ amscale <- function(x, respindex = NULL) {
   }
 
   # Get names
-  stimNames <- names(x)
+  stimNames <- names(x) # need to update this to do conditionally if unput is a df, generate stims if a matrix
 
   # If input is df, convert to matrix
   if (is.data.frame(x)) {
@@ -99,7 +99,7 @@ amscale <- function(x, respindex = NULL) {
     Xi <- Xi[tests]
     idvecCC <- idvecCC[tests]
     n <- sum(tests)
-    warning(paste0(c(sum(!tests), " respondent matrices were not invertible.")))
+    warning(paste0(c("Xi'Xi was not inveritible for ", sum(!tests), " respondents.")))
   }
 
 
