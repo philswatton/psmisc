@@ -5,16 +5,17 @@
 #' @param x A dataframe or matrix containing integer values of respondent placements of stimuli.
 #' @param respindex An optional integer giving the column index of respondent self-placements.
 #' @param polarity An optional integer giving the column index of a stimulus you wish to be positive in value. All stimuli will be calculated in relation to this declaration.
-#' @param iter To calculate the true stimuli values, amscale() uses matlib's Eigen() function, which uses iterative QR decomposition. Set the max number of iterations via this parameter.
+#' @param iter To calculate the true stimuli values, amscale uses matlib's Eigen function, which uses iterative QR decomposition. Set the max number of iterations via this parameter.
 #'
-#' @return A list containing four objects.
+#' @return A list containing four objects:
 #'
-#'         stimuli contains a double vector of the scaled stimuli.
+#' stimuli contains a double vector of the scaled stimuli.
 #'
-#'         respondent is a dataframe of the same length of the input containing respondent
-#'         intercepts, weights; and if respindex was specified self-placements and ideal points.
+#' respondent is a dataframe of the same length of the input containing respondent intercepts, weights; and if respindex was specified self-placements and ideal points.
 #'
-#'         fit is a single value for AM's fit statistic for the model.
+#' fit is a single value for AM's fit statistic for the model.
+#'
+#' eigenvalues are the eigenvalues computed from the matrix A - nI
 #'
 #' @export
 #'

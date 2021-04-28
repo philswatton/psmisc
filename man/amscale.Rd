@@ -4,7 +4,7 @@
 \alias{amscale}
 \title{Aldrich-McKlevey Scaling}
 \usage{
-amscale(x, respindex = NULL, polarity = NULL, iter = 500)
+amscale(x, respindex = NULL, polarity = NULL, iter = 1000)
 }
 \arguments{
 \item{x}{A dataframe or matrix containing integer values of respondent placements of stimuli.}
@@ -13,16 +13,18 @@ amscale(x, respindex = NULL, polarity = NULL, iter = 500)
 
 \item{polarity}{An optional integer giving the column index of a stimulus you wish to be positive in value. All stimuli will be calculated in relation to this declaration.}
 
-\item{iter}{To calculate the true stimuli values, amscale() uses matlib's Eigen() function, which uses iterative QR decomposition. Set the max number of iterations via this parameter.}
+\item{iter}{To calculate the true stimuli values, amscale uses matlib's Eigen function, which uses iterative QR decomposition. Set the max number of iterations via this parameter.}
 }
 \value{
-A list containing four objects.\preformatted{    stimuli contains a double vector of the scaled stimuli.
+A list containing four objects:
 
-    respondent is a dataframe of the same length of the input containing respondent
-    intercepts, weights; and if respindex was specified self-placements and ideal points.
+stimuli contains a double vector of the scaled stimuli.
 
-    fit is a single value for AM's fit statistic for the model.
-}
+respondent is a dataframe of the same length of the input containing respondent intercepts, weights; and if respindex was specified self-placements and ideal points.
+
+fit is a single value for AM's fit statistic for the model.
+
+eigenvalues are the eigenvalues computed from the matrix A - nI
 }
 \description{
 An implementation of Aldrich-McKlevey's (1977) scaling method for perceptual data.
