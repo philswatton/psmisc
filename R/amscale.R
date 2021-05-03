@@ -138,11 +138,14 @@ amscale <- function(x, respindex = NULL, polarity=NULL, iter=1000) {
   # eig <- eigen(AnI)
   eig <- matlib::Eigen(AnI, max.iter = iter)
 
+  # get eigenvalues
+  eigenvalues <- eig$values
+
   # Calculate index for highest negative nonzero eigenvalue
   index <- which.max(replace(eigenvalues, eigenvalues >= 0, NA))
 
   # get value of highest negative nonzero eigenvalue (for calculation of model fit)
-  e2 <- -eig$values[index] # note the eigenvalue correspondents to -1* sum of squared errors
+  e2 <- -eigenvalues[index] # note the eigenvalue correspondents to -1* sum of squared errors
 
   # get stimuli
   stimuli <- eig$vectors[,index]
@@ -194,13 +197,10 @@ amscale <- function(x, respindex = NULL, polarity=NULL, iter=1000) {
 
   ## Return
 
-  # Return list
-  out <- list()
-  out$stimuli <- stimuli
-  out$respondents <- respondent
-  out$eigenvalues <- eigenvalues
-  out$fit <- fit
-  return(out)
+  return(list(stimuli = stimuli,
+              respondents = respondent,
+              eigenvalues = eigenvalues,
+              fit = fit))
 
   # Debugging list
   # return(list(stimuli, A, AnI, eig))

@@ -70,16 +70,14 @@ ordTable <- function(data, vars, compute=c("median", "agreement", "min", "25q", 
 
 
   # Initialise for first variable
-  vec <- data[vars[1]][[1]]
-  # out <- data.frame(name = vars[1], stats::median(vec, na.rm=T), agreement(vec), min(vec, na.rm=T), stats::quantile(vec, probs=c(.25), na.rm=T), stats::quantile(vec, probs=c(.75), na.rm=T), max(vec, na.rm=T), sum(!is.na(vec)))
+  vec <- data[[vars[1]]]
   out <- makeRow(vec, vars[1])
 
 
   # Keep adding more for subsequent variables if they've been listed
   if (length(vars) > 1) {
     for (i in 2:length(vars)) {
-      vec <- data[vars[i]][[1]]
-      # out <- rbind(out, data.frame(name = vars[i], stats::median(vec, na.rm=T), agreement(vec), min(vec, na.rm=T), stats::quantile(vec, probs=c(.25), na.rm=T), stats::quantile(vec, probs=c(.75), na.rm=T), max(vec, na.rm=T), sum(!is.na(vec))))
+      vec <- data[[vars[i]]]
       out <- rbind(out, makeRow(vec, vars[i]))
     }
   }
