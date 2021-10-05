@@ -22,22 +22,22 @@
 #' @examples
 amscale <- function(x, respindex = NULL, polarity=NULL, iter=1000) {
 
-  # Function implementing Aldrich-McKlevey Scaling
+  # Function implementing Aldrich-McKelvey Scaling - V2
 
-  # Step 1: Take input df, conditionally split into respondent self-placements & stimuli placements
-  # Step 2: Convert stimuli placements to individual matrices Xi & count of placements q along w/ count of respondents n
-  # Step 3: Calculate A = sum(Xi(Xi'Xi)^-1Xi')
-  # Step 4: Choose appropriate eigenvector of A - nI as the solution
-  # Step 5: Calculate model fit
-  # Step 6: Calculate respondent intercepts & weights
-  # Step 7: If respondent self-placements provided, convert to respondent ideal points using intercepts & weights
-
-
-
+  # Step 1: Take input df (optionally also take respondent vector and polarity direction)
+  # Step 2: Optionally save locations of full respondents before reducing to complete cases
+  # Step 3: Count number of respondents who have placed all stimuli (do BEFORE )
+  # Step 3: Convert stimuli placements to individual matrices Xi
+  # Step 4: Count number of stimuli q and number of respondents w/ complete responses n (have to do AFTER)
+  # Step 5: Calculate A = sum(Xi(Xi'Xi)^-1Xi')
+  # Step 6: Obtain eigenvector corresponding to the highest negative eigenvalue of (A - nI) as the solution
+  # Step 7: Convert solution conditional on polarity
+  # Step 8: Calculate model fit
+  # Step 9: Calculate respondent intercepts & weights
+  # Step 10: If respondent self-placements provided, obtain ideal pts using intercepts & weights
 
   # TODO:
   # - Write validation for polarity input
-  # - Allow users to just stick in a full data frame and specify which columns they want to scale
   # - Consider replacing the use of solve() for other methods of calculating inverses - e.g. QR decomposition
   # - Write summary() method
   # - Complete the output
