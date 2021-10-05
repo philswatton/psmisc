@@ -2,16 +2,15 @@
 #'
 #' An implementation of Aldrich-McKlevey's (1977) scaling method for perceptual data.
 #'
-#' @param x A dataframe or matrix containing integer values of respondent placements of stimuli.
-#' @param respindex An optional integer giving the column index of respondent self-placements.
-#' @param polarity An optional integer giving the column index of a stimulus you wish to be positive in value. All stimuli will be calculated in relation to this declaration.
-#' @param iter To calculate the true stimuli values, amscale uses matlib's Eigen function, which uses iterative QR decomposition. Set the max number of iterations via this parameter.
+#' @param x A dataframe or matrix containing numeric values of respondent placements of stimuli, with stimuli on columns and respondents on rows.
+#' @param resp A optional numeric vector containing respondent self-placements.
+#' @param polarity An optional integer giving the column index of a stimulus that you wish to have a negative value. All stimuli and respondent self-placements will also be coded accordingly.
 #'
 #' @return A list containing four objects:
 #'
 #' stimuli contains a double vector of the scaled stimuli.
 #'
-#' respondent is a dataframe of the same length of the input containing respondent intercepts, weights; and if respindex was specified self-placements and ideal points.
+#' respondent is a dataframe of the same length of the input containing respondent intercepts, weights; and if resp was not NULL self-placements and ideal points.
 #'
 #' fit is a single value for AM's fit statistic for the model.
 #'
@@ -20,7 +19,7 @@
 #' @export
 #'
 #' @examples
-amscale <- function(x, respindex = NULL, polarity=NULL, iter=1000) {
+amscale <- function(x, resp = NULL, polarity = NULL) {
 
   # Function implementing Aldrich-McKelvey Scaling - V2
 
@@ -37,7 +36,7 @@ amscale <- function(x, respindex = NULL, polarity=NULL, iter=1000) {
   # Step 10: If respondent self-placements provided, obtain ideal pts using intercepts & weights
 
   # TODO:
-  # - Write validation for polarity input
+  # - Always return non-invertable respondents (?)
   # - Consider replacing the use of solve() for other methods of calculating inverses - e.g. QR decomposition
   # - Write summary() method
   # - Complete the output
@@ -52,37 +51,45 @@ amscale <- function(x, respindex = NULL, polarity=NULL, iter=1000) {
     stop("Error: x should be data frame or matrix")
   }
 
-  # Get names
-  stimNames <- names(x) # need to update this to do conditionally if unput is a df, generate stims if a matrix
-
   # If input is df, convert to matrix
   if (is.data.frame(x)) {
+
+    # Get names
+    stimNames <- names(x)
+
+    # Convert to matrix
     x <- as.matrix(x)
   }
 
-  # Ensure matrix contains only integer values
+  # Ensure matrix contains only numeric values
   if (!is.numeric(x)) {
-    stop("Error: x should contain only integer or missing values")
-  } else if (!all(mapply(function(y) y %% 1 == 0 | is.na(y), x))) {
-    stop("Error: x should contain only integer or missing values")
+    stop("Error: x should be a matrix or dataframe containing only numeric values")
   }
 
-  # Calculate N (total number of respondents in the input) and q (number of stimuli)
+  # Calculate N (total number of respondents in the input) and J (number of stimuli)
   N <- nrow(x)
-  q <- ncol(x)
+  J <- ncol(x)
 
   # If provided, validate respondent index
-  if (!is.null(respindex)) {
-    if (respindex %% 1 != 0 | length(respindex) != 1)
-    stop("Error: Respondent index should be a single integer value giving the location of the respondent self placements in the input")
+  if (!is.null(resp)) {
+    if (!is.numeric(resp)) {
+      stop("Error: resp should either be NULL or a numeric vector")
+    }
+
+    # Make sure x and resp have the same N
+    if (length(resp) != N) {
+      stop("Error: if provided, resp should contain the same number of rows as x")
+    }
   }
 
-  # If respondent placements provided, partition into respondent & stimuli matrices
-  if (!is.null(respindex)) {
-    resp <- x[respindex]
-    x <- x[,-respindex]
-    stimNames <- stimNames[-respindex]
-    q <- q - 1
+  # Validate polarity
+  if (!is.null(polarity)) {
+    if (!is.integer(polarity)) {
+      stop("Error: polarity should be NULL or an integer value")
+    }
+    if (polarity > J) {
+      stop("Error: if provided, polarity should index one of the columns of x")
+    }
   }
 
 
@@ -90,19 +97,18 @@ amscale <- function(x, respindex = NULL, polarity=NULL, iter=1000) {
 
   ## Step 2: Prepare Xi matrices
 
-  # Create id vector to facilitate keeping output respondents df to the same size of the original
-  idvec <- 1:N
-  idvecCC <- idvec[complete.cases(x)] # this will be used to bind respondent results at the end
+  # Create ID vector and a second vector index complete cases of x
+  id <- 1:N
+  ccindex <- id[complete.cases(x)]
 
   # Filter x for complete cases
-  mat <- x[complete.cases(x),]
+  mat <- x[ccindex,]
 
-  # Calculate cc (n of respondents with complete answers for the stimuli)
+  # Calculate n of complete cases (in terms of responses)
   cc <- nrow(mat)
-  n <- cc # total n of respondents
 
   # Break up into consituent Xi matrices
-  Xi <- lapply(1:cc, function(i) matrix(c(replicate(q, 1), t(mat[i,])), nrow=q))
+  Xi <- lapply(1:cc, function(i) matrix(c(replicate(J, 1), t(mat[i,])), nrow=J))
 
   # Check if respondent matrix is invertible
   tests <- sapply(1:cc, function(i) class(try(solve(t(Xi[[i]]) %*% Xi[[i]]), silent=T))[1] == "matrix")
@@ -110,7 +116,7 @@ amscale <- function(x, respindex = NULL, polarity=NULL, iter=1000) {
   # Filter out respondents with non-invertible matrices
   if (any(!tests)) {
     Xi <- Xi[tests]
-    idvecCC <- idvecCC[tests]
+    ccindex <- ccindex[tests]
     n <- sum(tests)
     warning(paste0(c("Xi'Xi was not inveritible for ", sum(!tests), " respondents.")))
   }
@@ -123,8 +129,8 @@ amscale <- function(x, respindex = NULL, polarity=NULL, iter=1000) {
   # Calculate A
   A <- Reduce('+', lapply(1:n, function(i) Xi[[i]] %*% solve(t(Xi[[i]]) %*% Xi[[i]]) %*% t(Xi[[i]])))
 
-  # Calculate I_q
-  I <- diag(q)
+  # Calculate I_J
+  I <- diag(J)
 
   # Calculate A - nI
   AnI <- A - (n * I)
@@ -135,8 +141,7 @@ amscale <- function(x, respindex = NULL, polarity=NULL, iter=1000) {
   ## Step 4: Calculate result
 
   # Calculate eigenvalues and eigenvectors
-  # eig <- eigen(AnI)
-  eig <- matlib::Eigen(AnI, max.iter = iter)
+  eig <- eigen(AnI)
 
   # get eigenvalues
   eigenvalues <- eig$values
@@ -163,7 +168,7 @@ amscale <- function(x, respindex = NULL, polarity=NULL, iter=1000) {
 
 
   ## Step 5: Calculate model fit
-  fit <- (n * e2)/(q*(n + e2)^2)
+  fit <- (n * e2)/(J*(n + e2)^2)
 
 
 
@@ -176,9 +181,9 @@ amscale <- function(x, respindex = NULL, polarity=NULL, iter=1000) {
   weight <- sapply(1:n, function(i) solutions[[i]][2])
 
   # Put into DF same length as inputs
-  respondent <- data.frame(idvec)
-  solution <- data.frame(idvecCC, intercept, weight)
-  respondent <- merge(respondent, solution, by.x = "idvec", by.y = "idvecCC", all.x=T, all.y=F)
+  respondent <- data.frame(id)
+  solution <- data.frame(ccindex, intercept, weight)
+  respondent <- merge(respondent, solution, by.x = "id", by.y = "ccindex", all.x=T, all.y=F)
 
   # Finalise by removing idvec
   respondent <- respondent[2:3]
@@ -187,9 +192,8 @@ amscale <- function(x, respindex = NULL, polarity=NULL, iter=1000) {
 
   ## Step 7: Calculate ideal points
 
-  if (!is.null(respindex)) {
-    respondent$selfplace <- resp
-    respondent$idealpt <- respondent$intercept + (respondent$weight * respondent$selfplace)
+  if (!is.null(resp)) {
+    respondent$idealpt <- respondent$intercept + (respondent$weight * resp)
   }
 
 
