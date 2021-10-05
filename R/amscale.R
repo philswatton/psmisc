@@ -111,7 +111,9 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
   Xi <- lapply(1:cc, function(i) matrix(c(replicate(J, 1), t(mat[i,])), nrow=J))
 
   # Check if respondent matrix is invertible
-  tests <- sapply(1:cc, function(i) class(try(solve(t(Xi[[i]]) %*% Xi[[i]]), silent=T))[1] == "matrix")
+
+  # tests <- sapply(1:cc, function(i) class(try(solve(t(Xi[[i]]) %*% Xi[[i]]), silent=T))[1] == "matrix")
+  tests <- sapply(1:cc, function(i) class(try(qr.Q(qr(Xi[[i]])), silent=T))[1] == "matrix")
 
   # Filter out respondents with non-invertible matrices
   if (any(!tests)) {
@@ -119,6 +121,10 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
     ccindex <- ccindex[tests]
     n <- sum(tests)
     warning(paste0(c("Xi'Xi was not inveritible for ", sum(!tests), " respondents.")))
+  } else {
+
+    n <- cc
+
   }
 
 
@@ -127,7 +133,8 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
   ## Step 3: Calculate A, I, (A - nI)
 
   # Calculate A
-  A <- Reduce('+', lapply(1:n, function(i) Xi[[i]] %*% solve(t(Xi[[i]]) %*% Xi[[i]]) %*% t(Xi[[i]])))
+  # A <- Reduce('+', lapply(1:n, function(i) Xi[[i]] %*% solve(t(Xi[[i]]) %*% Xi[[i]]) %*% t(Xi[[i]])))
+  A <- Reduce('+', lapply(1:n, function(i) qr.Q(qr(Xi[[i]])) %*% t(qr.Q(qr(Xi[[i]])))))
 
   # Calculate I_J
   I <- diag(J)
@@ -176,9 +183,14 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
   ## Step 6: Calculate respondent intercepts & weights
 
   # Calculate
-  solutions <- lapply(1:n, function(i) solve(t(Xi[[i]]) %*% Xi[[i]]) %*% t(Xi[[i]]) %*% stimuli)
+  # solutions <- lapply(1:n, function(i) solve(t(Xi[[i]]) %*% Xi[[i]]) %*% t(Xi[[i]]) %*% stimuli)
+  # intercept <- sapply(1:n, function(i) solutions[[i]][1])
+  # weight <- sapply(1:n, function(i) solutions[[i]][2])
+  solutions <- lapply(1:n, function(i) lm(stimuli ~ Xi[[i]][,2])$coefficients)
   intercept <- sapply(1:n, function(i) solutions[[i]][1])
   weight <- sapply(1:n, function(i) solutions[[i]][2])
+
+
 
   # Put into DF same length as inputs
   respondent <- data.frame(id)
