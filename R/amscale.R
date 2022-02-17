@@ -7,14 +7,16 @@
 #' @param resp A optional numeric vector containing respondent self-placements.
 #' @param polarity An optional integer giving the column index of a stimulus that you wish to have a negative value. All stimuli and respondent self-placements will also be coded accordingly.
 #'
-#' @return A list containing four objects:\tabular{ll}{
+#' @return A list containing five objects:\tabular{ll}{
 #'    \code{stimuli} \tab Double vector containing scaled stimuli estimates. \cr
 #'    \tab \cr
-#'    \code{respondent} \tab Dataframe of the same length as the input containing respondent intercepts, weights; and if resp was not NULL self-placements and ideal points. \cr
+#'    \code{respondent} \tab Dataframe of the same length as the input containing respondent intercepts, weights; and if resp was not NULL respondent ideal points. \cr
 #'    \tab \cr
-#'    \code{fit} \tab Double vector containing single value representing the fit statistic for the model. \cr
+#'    \code{fit} \tab The value of the fit statistic for the model. \cr
 #'    \tab \cr
-#'    \code{eigenvalues} \tab The eigenvalues computed from the decomposition of the matrix **A** - n**I**.
+#'    \code{nresp} \tab The number of respondents in the initial input. \cr
+#'    \tab \cr
+#'    \code{ccases} The number of respondents scaled in the model after filtering for missing data.
 #' }
 #'
 #' @references
@@ -28,26 +30,6 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
 
   # Function implementing Aldrich-McKelvey Scaling - V2
 
-  # Step 1: Take input df (optionally also take respondent vector and polarity direction)
-  # Step 2: Optionally save locations of full respondents before reducing to complete cases
-  # Step 3: Count number of respondents who have placed all stimuli (do BEFORE )
-  # Step 3: Convert stimuli placements to individual matrices Xi
-  # Step 4: Count number of stimuli q and number of respondents w/ complete responses n (have to do AFTER)
-  # Step 5: Calculate A = sum(Xi(Xi'Xi)^-1Xi')
-  # Step 6: Obtain eigenvector corresponding to the highest negative eigenvalue of (A - nI) as the solution
-  # Step 7: Convert solution conditional on polarity
-  # Step 8: Calculate model fit
-  # Step 9: Calculate respondent intercepts & weights
-  # Step 10: If respondent self-placements provided, obtain ideal pts using intercepts & weights
-
-  # TODO:
-  # - Always return non-invertable respondents (?)
-  # - Consider replacing the use of solve() for other methods of calculating inverses - e.g. QR decomposition
-  # - Write summary() method
-  # - Complete the output
-
-
-
 
   ## Step 1: Validate and prepare input
 
@@ -56,7 +38,11 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
     stop("Error: x should be data frame or matrix")
   }
 
-  # If input is df, convert to matrix
+  # Calculate N (total number of respondents in the input) and J (number of stimuli)
+  N <- nrow(x)
+  J <- ncol(x)
+
+  # If input is df, convert to matrix, get names
   if (is.data.frame(x)) {
 
     # Get names
@@ -64,16 +50,20 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
 
     # Convert to matrix
     x <- as.matrix(x)
+  } else {
+
+    if (is.null(colnames(x))) {
+      stimNames <- paste0("stim", 1:J)
+    } else {
+      stimNames <- colnames(x)
+    }
+
   }
 
   # Ensure matrix contains only numeric values
   if (!is.numeric(x)) {
     stop("Error: x should be a matrix or dataframe containing only numeric values")
   }
-
-  # Calculate N (total number of respondents in the input) and J (number of stimuli)
-  N <- nrow(x)
-  J <- ncol(x)
 
   # If provided, validate respondent index
   if (!is.null(resp)) {
@@ -101,8 +91,6 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
   }
 
 
-
-
   ## Step 2: Prepare Xi and Qi matrices
 
   # Create ID vector and a second vector index complete cases of x
@@ -123,8 +111,6 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
   Qi <- lapply(1:n, function(i) qr.Q(QRi[[i]]))
 
 
-
-
   ## Step 3: Calculate A, I, (A - nI)
 
   # Calculate A
@@ -137,24 +123,26 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
   AnI <- A - (n * I)
 
 
+  ## Step 4: Calculate result via SVD
 
+  # Calculate SVD
+  decomp <- svd(AnI)
+  u <- decomp$u
+  d <- decomp$d
+  v <- decomp$v
 
-  ## Step 4: Calculate result
-
-  # Calculate eigenvalues and eigenvectors
-  eig <- eigen(AnI)
-
-  # get eigenvalues
-  eigenvalues <- eig$values
+  # Establish which eigenvalues were positive
+  pos <- apply((u > 0) == (v >0), 2, any)
+  d[!pos] <- d[!pos] * -1
 
   # Calculate index for highest negative nonzero eigenvalue
-  index <- which.max(replace(eigenvalues, eigenvalues >= 0, NA))
+  index <- which.max(replace(d, d >= 0, NA))
 
-  # get value of highest negative nonzero eigenvalue (for calculation of model fit)
-  e2 <- -eigenvalues[index] # note the eigenvalue correspondents to -1* sum of squared errors
+  # Get value of highest negative nonzero eigenvalue (for calculation of model fit)
+  e2 <- -d[index]
 
-  # get stimuli
-  stimuli <- eig$vectors[,index]
+  # Get value of stimuli
+  stimuli <- v[,index]
   names(stimuli) <- stimNames
 
   # if a polarity has been specified, ensure stimuli are positive
@@ -165,13 +153,8 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
   }
 
 
-
-
-
   ## Step 5: Calculate model fit
   fit <- (n * e2)/(J*(n + e2)^2)
-
-
 
 
   ## Step 6: Calculate respondent intercepts & weights
@@ -190,26 +173,25 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
   respondent <- respondent[2:3]
 
 
-
   ## Step 7: Calculate ideal points
-
   if (!is.null(resp)) {
     respondent$idealpt <- respondent$intercept + (respondent$weight * resp)
   }
 
 
+  ## Step 8: Output
 
+  # Store output in a list
+  out <- list(stimuli = stimuli,
+              respondents = respondent,
+              fit = fit,
+              nresp <- N,
+              ccases <- n)
 
-  ## Return
+  # Assign class for S3 methods
+  class(out) <- "amscale"
 
-  # return(list(stimuli = stimuli,
-  #             respondents = respondent,
-  #             eigenvalues = eigenvalues,
-  #             fit = fit))
-
-  # return(eig)
-
-  # Debugging list
-  return(list(stimuli, A, AnI, eig))
+  # Return
+  return(out)
 
 }

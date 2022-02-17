@@ -14,14 +14,16 @@ amscale(x, resp = NULL, polarity = NULL)
 \item{polarity}{An optional integer giving the column index of a stimulus that you wish to have a negative value. All stimuli and respondent self-placements will also be coded accordingly.}
 }
 \value{
-A list containing four objects:\tabular{ll}{
+A list containing five objects:\tabular{ll}{
 \code{stimuli} \tab Double vector containing scaled stimuli estimates. \cr
 \tab \cr
-\code{respondent} \tab Dataframe of the same length as the input containing respondent intercepts, weights; and if resp was not NULL self-placements and ideal points. \cr
+\code{respondent} \tab Dataframe of the same length as the input containing respondent intercepts, weights; and if resp was not NULL respondent ideal points. \cr
 \tab \cr
-\code{fit} \tab Double vector containing single value representing the fit statistic for the model. \cr
+\code{fit} \tab The value of the fit statistic for the model. \cr
 \tab \cr
-\code{eigenvalues} \tab The eigenvalues computed from the decomposition of the matrix \strong{A} - n\strong{I}.
+\code{nresp} \tab The number of respondents in the initial input. \cr
+\tab \cr
+\code{ccases} The number of respondents scaled in the model after filtering for missing data.
 }
 }
 \description{
