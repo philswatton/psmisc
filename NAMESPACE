@@ -2,4 +2,5 @@
 
 export(agreement)
 export(amscale)
-export(ordTable)
+export(pascal)
+export(permtest)
