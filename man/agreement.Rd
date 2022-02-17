@@ -17,3 +17,6 @@ double
 \description{
 An implementation of Van der Ejik's (2001) agreement coefficient show dispersion in an ordinal distribution. Ranges from -1 (complete polarisation) to 1 (complete agreement).
 }
+\references{
+\insertRef{van2001}{psmisc}
+}

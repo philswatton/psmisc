@@ -6,6 +6,10 @@
 #' @param values Atomic vector containing unique values of the input vector. Necessary if the vector contains 0 of a given value.
 #'
 #' @return double
+#'
+#' @references
+#' \insertRef{van2001}{psmisc}
+#'
 #' @export
 #'
 agreement <- function(x, values=NULL) {
