@@ -21,14 +21,16 @@ A list containing five objects:\tabular{ll}{
 \tab \cr
 \code{fit} \tab The value of the fit statistic for the model. \cr
 \tab \cr
-\code{nresp} \tab The number of respondents in the initial input. \cr
+\code{ninput} \tab The number of respondents in the initial input. \cr
 \tab \cr
-\code{ccases} The number of respondents scaled in the model after filtering for missing data.
+\code{nresp} \tab The number of respondents used for scaling the stimuli in the model after filtering for missing data. \cr
+\tab \cr
+\code{nstim} \tab The number of stimuli scaled in the model.
 }
 }
 \description{
 Performs Aldrich-McKlevey's (1977) scaling method for perceptual
-data using the QR decomposition method (Swatton 2021) for calculation.
+data using the QR decomposition method (Swatton 2021) for computation.
 }
 \references{
 \insertRef{aldrich1977}{psmisc}

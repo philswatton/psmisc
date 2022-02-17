@@ -1,7 +1,7 @@
 #' Aldrich-McKlevey Scaling
 #'
 #' Performs Aldrich-McKlevey's (1977) scaling method for perceptual
-#' data using the QR decomposition method (Swatton 2021) for calculation.
+#' data using the QR decomposition method (Swatton 2021) for computation.
 #'
 #' @param x A dataframe or matrix containing numeric values of respondent placements of stimuli, with stimuli on columns and respondents on rows.
 #' @param resp A optional numeric vector containing respondent self-placements.
@@ -14,9 +14,11 @@
 #'    \tab \cr
 #'    \code{fit} \tab The value of the fit statistic for the model. \cr
 #'    \tab \cr
-#'    \code{nresp} \tab The number of respondents in the initial input. \cr
+#'    \code{ninput} \tab The number of respondents in the initial input. \cr
 #'    \tab \cr
-#'    \code{ccases} The number of respondents scaled in the model after filtering for missing data.
+#'    \code{nresp} \tab The number of respondents used for scaling the stimuli in the model after filtering for missing data. \cr
+#'    \tab \cr
+#'    \code{nstim} \tab The number of stimuli scaled in the model.
 #' }
 #'
 #' @references
@@ -123,7 +125,7 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
   AnI <- A - (n * I)
 
 
-  ## Step 4: Calculate result via SVD
+  ## Step 4: De facto eigendecomposition via SVD
 
   # Calculate SVD
   decomp <- svd(AnI)
@@ -147,7 +149,7 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
 
   # if a polarity has been specified, ensure stimuli are positive
   if (!is.null(polarity)) {
-    if (stimuli[polarity] < 0) {
+    if (stimuli[polarity] > 0) {
       stimuli <- -stimuli
     }
   }
@@ -185,8 +187,9 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
   out <- list(stimuli = stimuli,
               respondents = respondent,
               fit = fit,
-              nresp <- N,
-              ccases <- n)
+              ninput = N,
+              nresp = n,
+              nstim = J)
 
   # Assign class for S3 methods
   class(out) <- "amscale"
