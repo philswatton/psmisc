@@ -6,7 +6,7 @@ Authors@R:
            family = "Swatton",
            role = c("aut", "cre"),
            email = "p.j.swatton@essex.ac.uk")
-Description: Some miscellaneous functions I use in my work on categorical survey data
+Description: Miscellaneous functions useful for political scientists.
 License: `use_mit_license()`, `use_gpl3_license()` or friends to
     pick a license
 Encoding: UTF-8
@@ -15,4 +15,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Imports: 
     matlib,
-    stats
+    stats,
+    Rdpack
+RdMacros: Rdpack
+
