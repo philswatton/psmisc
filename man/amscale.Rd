@@ -4,28 +4,32 @@
 \alias{amscale}
 \title{Aldrich-McKlevey Scaling}
 \usage{
-amscale(x, respindex = NULL, polarity = NULL, iter = 1000)
+amscale(x, resp = NULL, polarity = NULL)
 }
 \arguments{
-\item{x}{A dataframe or matrix containing integer values of respondent placements of stimuli.}
+\item{x}{A dataframe or matrix containing numeric values of respondent placements of stimuli, with stimuli on columns and respondents on rows.}
 
-\item{respindex}{An optional integer giving the column index of respondent self-placements.}
+\item{resp}{A optional numeric vector containing respondent self-placements.}
 
-\item{polarity}{An optional integer giving the column index of a stimulus you wish to be positive in value. All stimuli will be calculated in relation to this declaration.}
-
-\item{iter}{To calculate the true stimuli values, amscale uses matlib's Eigen function, which uses iterative QR decomposition. Set the max number of iterations via this parameter.}
+\item{polarity}{An optional integer giving the column index of a stimulus that you wish to have a negative value. All stimuli and respondent self-placements will also be coded accordingly.}
 }
 \value{
-A list containing four objects:
-
-stimuli contains a double vector of the scaled stimuli.
-
-respondent is a dataframe of the same length of the input containing respondent intercepts, weights; and if respindex was specified self-placements and ideal points.
-
-fit is a single value for AM's fit statistic for the model.
-
-eigenvalues are the eigenvalues computed from the matrix A - nI
+A list containing four objects:\tabular{ll}{
+\code{stimuli} \tab Double vector containing scaled stimuli estimates. \cr
+\tab \cr
+\code{respondent} \tab Dataframe of the same length as the input containing respondent intercepts, weights; and if resp was not NULL self-placements and ideal points. \cr
+\tab \cr
+\code{fit} \tab Double vector containing single value representing the fit statistic for the model. \cr
+\tab \cr
+\code{eigenvalues} \tab The eigenvalues computed from the decomposition of the matrix \strong{A} - n\strong{I}.
+}
 }
 \description{
-An implementation of Aldrich-McKlevey's (1977) scaling method for perceptual data.
+Performs Aldrich-McKlevey's (1977) scaling method for perceptual
+data using the QR decomposition method (Swatton 2021) for calculation.
+}
+\references{
+\insertRef{aldrich1977}{psmisc}
+
+\insertRef{swatton2021}{psmisc}
 }

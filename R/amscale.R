@@ -1,24 +1,29 @@
 #' Aldrich-McKlevey Scaling
 #'
-#' An implementation of Aldrich-McKlevey's (1977) scaling method for perceptual data.
+#' Performs Aldrich-McKlevey's (1977) scaling method for perceptual
+#' data using the QR decomposition method (Swatton 2021) for calculation.
 #'
 #' @param x A dataframe or matrix containing numeric values of respondent placements of stimuli, with stimuli on columns and respondents on rows.
 #' @param resp A optional numeric vector containing respondent self-placements.
 #' @param polarity An optional integer giving the column index of a stimulus that you wish to have a negative value. All stimuli and respondent self-placements will also be coded accordingly.
 #'
-#' @return A list containing four objects:
+#' @return A list containing four objects:\tabular{ll}{
+#'    \code{stimuli} \tab Double vector containing scaled stimuli estimates. \cr
+#'    \tab \cr
+#'    \code{respondent} \tab Dataframe of the same length as the input containing respondent intercepts, weights; and if resp was not NULL self-placements and ideal points. \cr
+#'    \tab \cr
+#'    \code{fit} \tab Double vector containing single value representing the fit statistic for the model. \cr
+#'    \tab \cr
+#'    \code{eigenvalues} \tab The eigenvalues computed from the decomposition of the matrix **A** - n**I**.
+#' }
 #'
-#' stimuli contains a double vector of the scaled stimuli.
+#' @references
+#' \insertRef{aldrich1977}{psmisc}
 #'
-#' respondent is a dataframe of the same length of the input containing respondent intercepts, weights; and if resp was not NULL self-placements and ideal points.
-#'
-#' fit is a single value for AM's fit statistic for the model.
-#'
-#' eigenvalues are the eigenvalues computed from the matrix A - nI
+#' \insertRef{swatton2021}{psmisc}
 #'
 #' @export
 #'
-#' @examples
 amscale <- function(x, resp = NULL, polarity = NULL) {
 
   # Function implementing Aldrich-McKelvey Scaling - V2
@@ -78,16 +83,19 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
 
     # Make sure x and resp have the same N
     if (length(resp) != N) {
-      stop("Error: if provided, resp should contain the same number of rows as x")
+      stop("Error: if provided, resp should contain as many observations as x")
     }
   }
 
   # Validate polarity
   if (!is.null(polarity)) {
-    if (!is.integer(polarity)) {
-      stop("Error: polarity should be NULL or an integer value")
+    if (!is.numeric(polarity)) {
+      stop("Error: polarity should be NULL or numeric")
     }
-    if (polarity > J) {
+    if (polarity %% 1 != 0) {
+      stop("Error: polarity should be a natural number")
+    }
+    if (polarity > J | polarity < 1) {
       stop("Error: if provided, polarity should index one of the columns of x")
     }
   }
@@ -95,7 +103,7 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
 
 
 
-  ## Step 2: Prepare Xi matrices
+  ## Step 2: Prepare Xi and Qi matrices
 
   # Create ID vector and a second vector index complete cases of x
   id <- 1:N
@@ -105,27 +113,14 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
   mat <- x[ccindex,]
 
   # Calculate n of complete cases (in terms of responses)
-  cc <- nrow(mat)
+  n <- nrow(mat)
 
-  # Break up into consituent Xi matrices
-  Xi <- lapply(1:cc, function(i) matrix(c(replicate(J, 1), t(mat[i,])), nrow=J))
+  # Break up into constituent Xi matrices
+  Xi <- lapply(1:n, function(i) matrix(c(replicate(J, 1), t(mat[i,])), nrow=J))
 
-  # Check if respondent matrix is invertible
-
-  # tests <- sapply(1:cc, function(i) class(try(solve(t(Xi[[i]]) %*% Xi[[i]]), silent=T))[1] == "matrix")
-  tests <- sapply(1:cc, function(i) class(try(qr.Q(qr(Xi[[i]])), silent=T))[1] == "matrix")
-
-  # Filter out respondents with non-invertible matrices
-  if (any(!tests)) {
-    Xi <- Xi[tests]
-    ccindex <- ccindex[tests]
-    n <- sum(tests)
-    warning(paste0(c("Xi'Xi was not inveritible for ", sum(!tests), " respondents.")))
-  } else {
-
-    n <- cc
-
-  }
+  # Calculate QR decompositions for each respondent
+  QRi <- lapply(1:n, function(i) qr(Xi[[i]]))
+  Qi <- lapply(1:n, function(i) qr.Q(QRi[[i]]))
 
 
 
@@ -133,8 +128,7 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
   ## Step 3: Calculate A, I, (A - nI)
 
   # Calculate A
-  # A <- Reduce('+', lapply(1:n, function(i) Xi[[i]] %*% solve(t(Xi[[i]]) %*% Xi[[i]]) %*% t(Xi[[i]])))
-  A <- Reduce('+', lapply(1:n, function(i) qr.Q(qr(Xi[[i]])) %*% t(qr.Q(qr(Xi[[i]])))))
+  A <- Reduce('+', lapply(1:n, function(i) Qi[[i]] %*% t(Qi[[i]])))
 
   # Calculate I_J
   I <- diag(J)
@@ -183,14 +177,9 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
   ## Step 6: Calculate respondent intercepts & weights
 
   # Calculate
-  # solutions <- lapply(1:n, function(i) solve(t(Xi[[i]]) %*% Xi[[i]]) %*% t(Xi[[i]]) %*% stimuli)
-  # intercept <- sapply(1:n, function(i) solutions[[i]][1])
-  # weight <- sapply(1:n, function(i) solutions[[i]][2])
   solutions <- lapply(1:n, function(i) lm(stimuli ~ Xi[[i]][,2])$coefficients)
   intercept <- sapply(1:n, function(i) solutions[[i]][1])
   weight <- sapply(1:n, function(i) solutions[[i]][2])
-
-
 
   # Put into DF same length as inputs
   respondent <- data.frame(id)
@@ -213,12 +202,14 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
 
   ## Return
 
-  return(list(stimuli = stimuli,
-              respondents = respondent,
-              eigenvalues = eigenvalues,
-              fit = fit))
+  # return(list(stimuli = stimuli,
+  #             respondents = respondent,
+  #             eigenvalues = eigenvalues,
+  #             fit = fit))
+
+  # return(eig)
 
   # Debugging list
-  # return(list(stimuli, A, AnI, eig))
+  return(list(stimuli, A, AnI, eig))
 
 }
