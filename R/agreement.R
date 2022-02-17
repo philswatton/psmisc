@@ -1,6 +1,6 @@
 #' Van der Ejik's Agreement
 #'
-#' An implementation of Van der Ejik's (2001) agreement coeficient show dispersion in an ordinal distribution. Ranges from -1 (complete polarisation) to 1 (complete agreement).
+#' An implementation of Van der Ejik's (2001) agreement coefficient show dispersion in an ordinal distribution. Ranges from -1 (complete polarisation) to 1 (complete agreement).
 #'
 #' @param x Atomic vector containing integer values.
 #' @param values Atomic vector containing unique values of the input vector. Necessary if the vector contains 0 of a given value.
@@ -8,7 +8,6 @@
 #' @return double
 #' @export
 #'
-#' @examples
 agreement <- function(x, values=NULL) {
 
   # Function implementing Van der Eijk's Agreement
