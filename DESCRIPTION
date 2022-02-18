@@ -1,20 +1,19 @@
 Package: psmisc
-Title: What the Package Does (One Line, Title Case)
+Title: Miscellaneous functions useful for political science
 Version: 0.0.1
 Authors@R: 
     person(given = "Phil",
            family = "Swatton",
            role = c("aut", "cre"),
            email = "p.j.swatton@essex.ac.uk")
-Description: Miscellaneous functions useful for political scientists.
+Description: Miscellaneous functions useful for political science. Currently includes Aldrich-McKelvey scaling, Van der Ejik's agreement, and a permutation test function.
 License: `use_mit_license()`, `use_gpl3_license()` or friends to
     pick a license
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
-Imports: 
-    matlib,
+Imports:
     stats,
     Rdpack
 RdMacros: Rdpack
