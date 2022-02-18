@@ -22,12 +22,12 @@
 permtest <- function(x, y, group_names = NULL, iter=1000, alternative = "two-sided") {
 
   # Validate x and y
-  if (!is.numeric(x) |  !is.numeric(y)) {
+  if (!is.numeric(x) | !is.numeric(y)) {
     stop("x and y must both be numeric vectors")
   }
 
   # Remove missing data
-  numNA <- is.na(x) + is.na(y)
+  numNA <- sum(is.na(x)) + sum(is.na(y))
   if (numNA > 1) {
     x <- x[!is.na(x)]
     y <- y[!is.na(y)]
@@ -47,7 +47,7 @@ permtest <- function(x, y, group_names = NULL, iter=1000, alternative = "two-sid
   }
 
   # Validate iter
-  if (!is.numeric) {
+  if (!is.numeric(iter)) {
     stop("iter must be numeric")
   } else if (length(iter) < 1) {
     stop("only one value can be supplied for iter")
