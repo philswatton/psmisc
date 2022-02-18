@@ -1,4 +1,4 @@
-#' Summarising Aldrich McKelvey Models
+#' Summarising Aldrich-McKelvey Models
 #'
 #' @param object An object of class 'amscale'.
 #' @param digits Number of digits for rounding stimuli locations.

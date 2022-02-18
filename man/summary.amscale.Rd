@@ -2,7 +2,7 @@
 % Please edit documentation in R/summary.amscale.R
 \name{summary.amscale}
 \alias{summary.amscale}
-\title{Summarising Aldrich McKelvey Models}
+\title{Summarising Aldrich-McKelvey Models}
 \usage{
 \method{summary}{amscale}(object, digits = 3)
 }
@@ -15,5 +15,5 @@
 \code{summary.amscale} computes and presents the most salient information from the Aldrich-McKelvey scaling procedure implemented in \code{amscale}.
 }
 \description{
-Summarising Aldrich McKelvey Models
+Summarising Aldrich-McKelvey Models
 }
