@@ -2,7 +2,9 @@
 #'
 #' Performs Aldrich-McKlevey's (1977) scaling method for perceptual
 #' data using the QR decomposition method (Swatton 2021) for computation.
-#' The function will automatically filter missing data.
+#' The function will automatically filter missing data. Inspired by the
+#' \code{aldmck} function from the \code{basicspace} R package (Poole et
+#' al 2016).
 #'
 #' @param x A dataframe or matrix containing numeric values of respondent placements of stimuli, with stimuli on columns and respondents on rows.
 #' @param resp An optional numeric vector containing respondent self-placements.
@@ -25,6 +27,8 @@
 #'
 #' @references
 #' \insertRef{aldrich1977}{psmisc}
+#'
+#' \insertRef{poole2016}{psmisc}
 #'
 #' \insertRef{swatton2021}{psmisc}
 #'

@@ -15,8 +15,14 @@ agreement(x, values = NULL)
 double
 }
 \description{
-An implementation of Van der Ejik's (2001) agreement coefficient show dispersion in an ordinal distribution. Ranges from -1 (complete polarisation) to 1 (complete agreement).
+An implementation of Van der Ejik's (2001) agreement coefficient
+to quantify dispersion in an ordinal distribution. Ranges from -1
+(complete polarisation) to 1 (complete agreement). Partially based
+on the \code{agreement} function from the \code{agrmt} R package
+(Ruedin 2016).
 }
 \references{
 \insertRef{van2001}{psmisc}
+
+\insertRef{ruedin2016}{psmisc}
 }

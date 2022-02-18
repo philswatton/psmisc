@@ -1,6 +1,10 @@
 #' Van der Ejik's Agreement
 #'
-#' An implementation of Van der Ejik's (2001) agreement coefficient show dispersion in an ordinal distribution. Ranges from -1 (complete polarisation) to 1 (complete agreement).
+#' An implementation of Van der Ejik's (2001) agreement coefficient
+#' to quantify dispersion in an ordinal distribution. Ranges from -1
+#' (complete polarisation) to 1 (complete agreement). Partially based
+#' on the \code{agreement} function from the \code{agrmt} R package
+#' (Ruedin 2016).
 #'
 #' @param x Atomic vector containing integer values.
 #' @param values Atomic vector containing unique values of the input vector. Necessary if the vector contains 0 of a given value.
@@ -9,6 +13,8 @@
 #'
 #' @references
 #' \insertRef{van2001}{psmisc}
+#'
+#' \insertRef{ruedin2016}{psmisc}
 #'
 #' @export
 #'
@@ -108,7 +114,6 @@ agreement <- function(x, values=NULL) {
           } else if (pat[i] == 1 & pat[j] == 0 & pat[l] == 1) {
             TDU <- TDU + 1
           }
-
         }
       }
     }
