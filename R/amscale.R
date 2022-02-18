@@ -2,17 +2,19 @@
 #'
 #' Performs Aldrich-McKlevey's (1977) scaling method for perceptual
 #' data using the QR decomposition method (Swatton 2021) for computation.
+#' The function will automatically filter missing data.
 #'
 #' @param x A dataframe or matrix containing numeric values of respondent placements of stimuli, with stimuli on columns and respondents on rows.
-#' @param resp A optional numeric vector containing respondent self-placements.
+#' @param resp An optional numeric vector containing respondent self-placements.
 #' @param polarity An optional integer giving the column index of a stimulus that you wish to have a negative value. All stimuli and respondent self-placements will also be coded accordingly.
 #'
-#' @return A list containing five objects:\tabular{ll}{
+#' @return An object of class "\code{amscale}". The function \code{summary} prints a summary of the model and
+#' its results. An object of class "\code{amscale}" contain the following elements:\tabular{ll}{
 #'    \code{stimuli} \tab Double vector containing scaled stimuli estimates. \cr
 #'    \tab \cr
 #'    \code{respondent} \tab Dataframe of the same length as the input containing respondent intercepts, weights; and if resp was not NULL respondent ideal points. \cr
 #'    \tab \cr
-#'    \code{fit} \tab The value of the fit statistic for the model. \cr
+#'    \code{fit} \tab The adjusted fit statistic proposed in Aldrich and McKelvey's paper (1977) for the model. \cr
 #'    \tab \cr
 #'    \code{ninput} \tab The number of respondents in the initial input. \cr
 #'    \tab \cr
@@ -37,7 +39,7 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
 
   # Validate input is a df or matrix
   if (!is.matrix(x) & !is.data.frame(x)) {
-    stop("Error: x should be data frame or matrix")
+    stop("x should be data frame or matrix")
   }
 
   # Calculate N (total number of respondents in the input) and J (number of stimuli)
@@ -64,31 +66,31 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
 
   # Ensure matrix contains only numeric values
   if (!is.numeric(x)) {
-    stop("Error: x should be a matrix or dataframe containing only numeric values")
+    stop("x should be a matrix or dataframe containing only numeric values")
   }
 
   # If provided, validate respondent index
   if (!is.null(resp)) {
     if (!is.numeric(resp)) {
-      stop("Error: resp should either be NULL or a numeric vector")
+      stop("resp should either be NULL or a numeric vector")
     }
 
     # Make sure x and resp have the same N
     if (length(resp) != N) {
-      stop("Error: if provided, resp should contain as many observations as x")
+      stop("if provided, resp should contain as many observations as x")
     }
   }
 
   # Validate polarity
   if (!is.null(polarity)) {
     if (!is.numeric(polarity)) {
-      stop("Error: polarity should be NULL or numeric")
+      stop("polarity should be NULL or numeric")
     }
     if (polarity %% 1 != 0) {
-      stop("Error: polarity should be a natural number")
+      stop("polarity should be a natural number")
     }
     if (polarity > J | polarity < 1) {
-      stop("Error: if provided, polarity should index one of the columns of x")
+      stop("if provided, polarity should index one of the columns of x")
     }
   }
 
@@ -183,16 +185,8 @@ amscale <- function(x, resp = NULL, polarity = NULL) {
 
   ## Step 8: Output
 
-  # Store output in a list
-  out <- list(stimuli = stimuli,
-              respondents = respondent,
-              fit = fit,
-              ninput = N,
-              nresp = n,
-              nstim = J)
-
-  # Assign class for S3 methods
-  class(out) <- "amscale"
+  # Construct output
+  out <- psmisc:::amscale_constructor(stimuli, respondent, fit, N, n, J)
 
   # Return
   return(out)
