@@ -23,13 +23,13 @@ agreement <- function(x, values=NULL) {
 
   # Validate x
   if (!all(x %% 1 == 0 | is.na(x))) {
-    stop("Error: input x should be atomic vector containing only integer values")
+    stop("input x should be atomic vector containing only integer values")
   }
 
 
   # Validate values
   if (!is.null(values) & !all(values %% 1 == 0) | any(duplicated(values))) {
-    stop("Error: input values should be NULL or atomic vector containing only integer values with no duplicates")
+    stop("input values should be NULL or atomic vector containing only integer values with no duplicates")
   }
 
 
@@ -43,7 +43,7 @@ agreement <- function(x, values=NULL) {
 
   # A only exists with three or more unique values
   if (K < 3) {
-    stop("Error: Van der Ejik's agreement requires 3 or more unique values for calculation")
+    stop("agreement requires 3 or more unique values for calculation")
   }
 
 
