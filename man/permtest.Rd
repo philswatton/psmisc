@@ -4,12 +4,14 @@
 \alias{permtest}
 \title{Permutation test}
 \usage{
-permtest(x, group, iter = 1000, alternative = "two-sided")
+permtest(x, y, group_names = NULL, iter = 1000, alternative = "two-sided")
 }
 \arguments{
-\item{x}{Numeric vector to be tested}
+\item{x}{Numeric vector of data values for the first group.}
 
-\item{group}{Factor with two unique values. Pay attention to ordering.}
+\item{y}{Numeric vector of data values for the second group.}
+
+\item{group_names}{Optional character vector of group names.}
 
 \item{iter}{The number of iterations to run the permutation test for.}
 
@@ -19,7 +21,7 @@ permtest(x, group, iter = 1000, alternative = "two-sided")
 A list containing four objects:\tabular{ll}{
 \code{obs_diff} \tab A length one double vector containing the observed mean difference. \cr
 \tab \cr
-\code{d} \tab A double vector of length iter containing the mean differences from the permutations. \cr
+\code{d} \tab A double vector of length \code{iter} containing the mean differences from the permutations. \cr
 \tab \cr
 \code{p} \tab The p-value for the test. If \code{alternative} was "\code{two-sided}", this is the proportion of absolute mean differences greater than the observed mean difference. Otherwise, if \code{alternative} was "\code{greater}" or "\code{less}", this is the proportion of mean differences greater/less than the observed mean difference. \cr
 \tab \cr
@@ -27,8 +29,5 @@ A list containing four objects:\tabular{ll}{
 }
 }
 \description{
-Perform a one-sided or two-sided permutation test. Please note input validation
-has not been implemented yet and so user caution is required when using this function.
-Pay careful attention in particular to the '\code{group}' input. If performing a
-one-sided test, it's best if this is a factor ordered in the desired direction.
+Perform a one-sided or two-sided permutation test.
 }
