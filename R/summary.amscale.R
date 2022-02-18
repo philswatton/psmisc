@@ -17,8 +17,8 @@ summary.amscale <- function(object, digits=3) {
   cat("\n\n", sep="")
 
   cat("\nStimuli Location:\n")
-  stim <- matrix(round(temp$stimuli, digits=digits), ncol=1)
-  rownames(stim) <- names(temp$stimuli)
+  stim <- matrix(round(object$stimuli, digits=digits), ncol=1)
+  rownames(stim) <- names(object$stimuli)
   colnames(stim) <- "Location"
   print(stim)
 
