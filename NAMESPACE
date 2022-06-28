@@ -3,4 +3,4 @@
 S3method(summary,amscale)
 export(agreement)
 export(amscale)
-export(permtest)
+export(enp)
