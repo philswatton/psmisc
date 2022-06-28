@@ -49,3 +49,6 @@ These laws are:
 \strong{Vote share of the largest party}
 \deqn{v_1 = ((MS)^\frac{1}{4}+1)^(\frac{-1}{2})}{v1 = ((MS)^(1/4)+1)^(-1/2)}
 }
+\references{
+\insertRef{shugart2017}{psmisc}
+}

@@ -32,7 +32,7 @@
 #' \code{S}, \code{M}, and a column for each of the measures.
 #'
 #' @references
-#' \insertRef{shugart2017}
+#' \insertRef{shugart2017}{psmisc}
 #'
 #' @export
 #'
