@@ -5,8 +5,8 @@ Authors@R:
     person(given = "Phil",
            family = "Swatton",
            role = c("aut", "cre"),
-           email = "p.j.swatton@essex.ac.uk")
-Description: Miscellaneous functions useful for political science. Currently includes Aldrich-McKelvey scaling, Van der Ejik's agreement, and a permutation test function.
+           email = "philswatton@gmail.com")
+Description: Miscellaneous functions for political science.
 License: `use_mit_license()`, `use_gpl3_license()` or friends to
     pick a license
 Encoding: UTF-8
@@ -14,7 +14,7 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Imports:
-    rjags,
-    Rdpack
+    Rdpack,
+    rjags
 RdMacros: Rdpack
 
