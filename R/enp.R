@@ -186,7 +186,7 @@ enp <- function(p, type=3, S=NULL, range=F) {
 
     # Calculate minimum - diff between types 5 and 6
     if (type == 5) min <- S^2/sum(R^2 + p^2)
-    if (type == 6) min <- S^2/sum(R^2 + p^2)
+    if (type == 6) min <- S^2/sum(R*p[which.min(p)] + p^2)
 
     # Calculate estimate
     est <- (min + max)/2
