@@ -36,14 +36,24 @@
 #'
 #' @export
 #'
-vfs <- function(S, M) {
-  data.frame(S=S,
-             M=M,
-             Ns=psmisc::Ns(S,M),
-             s1=psmisc::s1(S,M),
-             Nv=psmisc::Nv(S,M),
-             v1=psmisc::v1(S,M)
+vfs <- function(S, M, ret_SM=T) {
+
+  outdf <-  data.frame(Ns=psmisc::Ns(S,M),
+                       s1=psmisc::s1(S,M),
+                       Nv=psmisc::Nv(S,M),
+                       v1=psmisc::v1(S,M)
   )
+
+  if (ret_SM) {
+
+    outdf <- cbind(data.frame(S=S,
+                              M=M),
+                   outdf)
+
+  }
+
+  return(outdf)
+
 }
 
 #' @rdname vfs
