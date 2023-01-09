@@ -3,9 +3,9 @@
 #' Implementations of the four laws from the book **Votes from Seats**.
 #'
 #' @param S Vector of assembly sizes. If \code{t} is provided, the vector of basic tier assembly sizes.
-#' @param M Vector of average district sizes.  If \code{t} is provided, the vector of basic tier assembly sizes.
+#' @param M Vector of average district sizes.  If \code{t} is provided, the vector of basic tier average district sizes.
 #' @param t Optional, vector of upper tier seat shares.
-#' @param ret_SM \code{TRUE} or \code{FALSE} denoting whether or not to return the values of \code{S} and \code{M}, and if supplied, \code{t}
+#' @param ret_SM A \code{TRUE} or \code{FALSE} value denoting whether or not to return the values of \code{S} and \code{M}, and if supplied, \code{t}
 #'
 #' @details
 #'
@@ -29,17 +29,16 @@
 #' If \code{t} is supplied, then these are instead calculated as:
 #'
 #' **Number of effective parties in terms of seats:**
-#' Ns = (2.5^t)*(MS)^(1/6)
+#' \deqn{N_s = 2.5^t (MS)^\frac{1}{6}}{Ns = (2.5^t)*(MS)^(1/6)}
 #'
 #' **Seat share of the largest party:**
-#' S1 = (0.5^t)*(MS)^(1/8)
+#' \deqn{s_1 = 0.5^t (MS)^\frac{1}{8}}{s1 = (0.5^t)*(MS)^(1/8)}
 #'
 #' **Number of effective parties in terms of votes:**
-#' Nv = ((4^t)*(MS^(1/4)) + 1)^(2/3)
+#' \deqn{N_v = (4^t (MS)^\frac{1}{4} + 1)^\frac{2}{3}}{Nv = ((4^t)*((MS)^(1/4)) + 1)^(2/3)}
 #'
 #' **Vote share of the largest party:**
-#' V1 = ((4^t)*(MS^(1/4)) + 1)^(-1/2)
-#'
+#' \deqn{v_1 = (4^t (MS)^\frac{1}{4} + 1)^\frac{-1}{2}}{v1 = ((4^t)*((MS)^(1/4)) + 1)^(-1/2)}
 #'
 #'
 #' @return
