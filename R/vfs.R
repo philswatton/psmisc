@@ -81,7 +81,7 @@ Ns <- function(S, M, t=NULL) {
 s1 <- function(S, M, t=NULL) {
   psmisc:::vfs_check(S,M,t)
   if(is.null(t)) return((M*S)**(-1/8))
-  if(!is.null(t)) return((0.5**t)*(M*S)**(1/8))
+  if(!is.null(t)) return((0.5**t)*(M*S)**(-1/8))
 }
 
 #' @rdname vfs
