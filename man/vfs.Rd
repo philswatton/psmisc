@@ -8,20 +8,24 @@
 \alias{v1}
 \title{Votes from Seats Laws}
 \usage{
-vfs(S, M)
+vfs(S, M, t = NULL, ret_SM = T)
 
-Ns(S, M)
+Ns(S, M, t = NULL)
 
-s1(S, M)
+s1(S, M, t = NULL)
 
-Nv(S, M)
+Nv(S, M, t = NULL)
 
-v1(S, M)
+v1(S, M, t = NULL)
 }
 \arguments{
-\item{S}{Vector of assembly sizes.}
+\item{S}{Vector of assembly sizes. If \code{t} is provided, the vector of basic tier assembly sizes.}
 
-\item{M}{Vector of average district sizes.}
+\item{M}{Vector of average district sizes.  If \code{t} is provided, the vector of basic tier average district sizes.}
+
+\item{t}{Optional, vector of upper tier seat shares.}
+
+\item{ret_SM}{A \code{TRUE} or \code{FALSE} value denoting whether or not to return the values of \code{S} and \code{M}, and if supplied, \code{t}}
 }
 \value{
 \code{Ns}, \code{s1}, \code{Nv}, \code{v1} all return a vector of
@@ -40,14 +44,28 @@ These laws are:
 \strong{Number of effective parties in terms of seats:}
 \deqn{N_s = (MS)^\frac{1}{6}}{Ns = (MS)^(1/6)}
 
-\strong{Seat share of the largest party}
+\strong{Seat share of the largest party:}
 \deqn{s_1 = (MS)^\frac{-1}{8}}{s1 = (MS)^(-1/8)}
 
 \strong{Number of effective parties in terms of votes:}
-\deqn{N_v = ((MS)^\frac{1}{4}+1)^(\frac{2}{3})}{Nv = ((MS)^(1/4)+1)^(2/3)}
+\deqn{N_v = ((MS)^\frac{1}{4}+1)^\frac{2}{3}}{Nv = ((MS)^(1/4)+1)^(2/3)}
 
-\strong{Vote share of the largest party}
-\deqn{v_1 = ((MS)^\frac{1}{4}+1)^(\frac{-1}{2})}{v1 = ((MS)^(1/4)+1)^(-1/2)}
+\strong{Vote share of the largest party:}
+\deqn{v_1 = ((MS)^\frac{1}{4}+1)^\frac{-1}{2}}{v1 = ((MS)^(1/4)+1)^(-1/2)}
+
+If \code{t} is supplied, then these are instead calculated as:
+
+\strong{Number of effective parties in terms of seats:}
+\deqn{N_s = 2.5^t (MS)^\frac{1}{6}}{Ns = (2.5^t)*(MS)^(1/6)}
+
+\strong{Seat share of the largest party:}
+\deqn{s_1 = 0.5^t (MS)^\frac{1}{8}}{s1 = (0.5^t)*(MS)^(1/8)}
+
+\strong{Number of effective parties in terms of votes:}
+\deqn{N_v = (4^t (MS)^\frac{1}{4} + 1)^\frac{2}{3}}{Nv = ((4^t)*((MS)^(1/4)) + 1)^(2/3)}
+
+\strong{Vote share of the largest party:}
+\deqn{v_1 = (4^t (MS)^\frac{1}{4} + 1)^\frac{-1}{2}}{v1 = ((4^t)*((MS)^(1/4)) + 1)^(-1/2)}
 }
 \references{
 \insertRef{shugart2017}{psmisc}
