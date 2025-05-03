@@ -137,7 +137,7 @@ enp <- function(p, type=3, S=NULL, range=F) {
 
     # Additional input checks
     if (any(0 > p | p > 1)) stop("For this type p must be a vector of proportions")
-    if (sum(p) != 1) stop("For this type p must sum to 1.")
+    if (!all.equal(sum(p), 1)) stop("For this type p must sum to 1.")
 
     # Measures
     if (type == 1) est <- 1 - sum(p^2) #fractionalisation
