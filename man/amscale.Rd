@@ -4,42 +4,75 @@
 \alias{amscale}
 \title{Aldrich-McKlevey Scaling}
 \usage{
-amscale(x, resp = NULL, polarity = NULL)
+amscale(
+  stim_placements,
+  self_placements = NULL,
+  compute_respondent_variables = TRUE,
+  polarity = NULL,
+  method = "matrix",
+  verbose = FALSE
+)
 }
 \arguments{
-\item{x}{A dataframe or matrix containing numeric values of respondent placements of stimuli, with stimuli on columns and respondents on rows.}
+\item{stim_placements}{A \code{data.frame} or \code{matrix} containing numeric values of respondent placements of stimuli, with stimuli on columns and respondents on rows.}
 
-\item{resp}{An optional numeric vector containing respondent self-placements.}
+\item{self_placements}{An optional numeric vector containing respondent self-placements. If provided, must have same number of elements as \code{stim_placements} has rows.}
 
-\item{polarity}{An optional integer giving the column index of a stimulus that you wish to have a negative value. All stimuli and respondent self-placements will also be coded accordingly.}
+\item{compute_respondent_variables}{Whether to compute individual respondent displacement parameters, defaults to \code{TRUE}. Ignored and treated as if \code{TRUE} if self_placements is provided.}
+
+\item{polarity}{An optional integer giving the column index of a stimulus that you wish to have a negative value. All stimuli and respondent self-placements will also be rescaled accordingly.}
+
+\item{method}{Either "matrix" or "QR". See details.}
+
+\item{verbose}{Whether to print diagnostic messages specific to the function while running. Defaults to \code{FALSE}.}
 }
 \value{
-An object of class "\code{amscale}". The function \code{summary} prints a summary of the model and
-its results. An object of class "\code{amscale}" contain the following elements:\tabular{ll}{
+An object of class "\code{amscale}", containing the following elements:\tabular{ll}{
 \code{stimuli} \tab Double vector containing scaled stimuli estimates. \cr
 \tab \cr
-\code{respondent} \tab Dataframe of the same length as the input containing respondent intercepts, weights; and if resp was not NULL respondent ideal points. \cr
+\code{respondent} \tab If \code{compute_respondent_variables} was not \code{NULL}, a \code{data.frame} with the same number of rows as the input containing respondent displacement intercepts and weights. If \code{self_placements was provided}, additionally contains estimated respondent ideal points. \cr
+\tab \cr
+\code{n_input} \tab The number of respondents in the initial input. \cr
+\tab \cr
+\code{n_used} \tab The number of respondents used for scaling the stimuli in the model after filtering for missing data. \cr
+\tab \cr
+\code{n_filtered} \tab The number of respondents filtered out due to missing data. \cr
+\tab \cr
+\code{n_dropped} \tab The number of respondents dropped to enable scaling. Will always be 0 if \code{method="QR"}. \cr
+\tab \cr
+\code{n_stim} \tab The number of stimuli scaled in the model. \cr
 \tab \cr
 \code{fit} \tab The adjusted fit statistic proposed in Aldrich and McKelvey's paper (1977) for the model. \cr
 \tab \cr
-\code{ninput} \tab The number of respondents in the initial input. \cr
-\tab \cr
-\code{nresp} \tab The number of respondents used for scaling the stimuli in the model after filtering for missing data. \cr
-\tab \cr
-\code{nstim} \tab The number of stimuli scaled in the model.
 }
 }
 \description{
 Performs Aldrich-McKlevey's (1977) scaling method for perceptual
-data using the QR decomposition method (Swatton 2021) for computation.
-The function will automatically filter missing data. Inspired by the
-\code{aldmck} function from the \code{basicspace} R package (Poole et
-al 2016).
+data. The function will automatically filter out missing data.
+}
+\details{
+Aldrich-McKelvey scaling takes a matrix of respondent placements of some stimuli
+(typically parties and/or candidates) on some scale (typically ideological dimensions)
+and estimates the positions of the stimuli on that scale. Unlike simply taking the mean,
+this process has some robustness to rationalisation bias, where respondents distort
+the scale in line with their own ideological preferences (see Bølstad 2020).
+
+This function implements two versions of Aldrich-McKelvey scaling. First
+\code{method="matrix"} implements the canonical version. Second, \code{method="QR"}
+implements a version using QR decomposition, which eliminates the need to drop some
+respondents (see Swatton 2021), but can be slower to compute.
+
+Where respondent self-placements are provided, respondent ideal points on the same
+scale can be estimated, through first estimating individual respondent distortion parameters.
+Where not provided, these distortion parameters can still be estimated, but this can
+be skipped by setting \code{compute_respondent_variables=FALSE}.
 }
 \references{
 \insertRef{aldrich1977}{psmisc}
 
 \insertRef{poole2016}{psmisc}
+
+\insertRef{bolstad2020capturing}{psmisc}
 
 \insertRef{swatton2021}{psmisc}
 }
