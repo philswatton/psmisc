@@ -12,7 +12,7 @@
 \item{digits}{Number of digits for rounding stimuli locations.}
 }
 \value{
-\code{summary.amscale} computes and presents the most salient information from the Aldrich-McKelvey scaling procedure implemented in \code{amscale}.
+\code{summary.amscale} computes and prints to console the most salient information from the Aldrich-McKelvey scaling procedure implemented in \code{amscale}.
 }
 \description{
 Summarising Aldrich-McKelvey Models
