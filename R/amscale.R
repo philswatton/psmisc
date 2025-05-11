@@ -13,7 +13,7 @@
 #' @return An object of class "\code{amscale}", containing the following elements:\tabular{ll}{
 #'    \code{stimuli} \tab Double vector containing scaled stimuli estimates. \cr
 #'    \tab \cr
-#'    \code{respondent} \tab If \code{compute_respondent_variables} was not \code{NULL}, a \code{data.frame} with the same number of rows as the input containing respondent displacement intercepts and weights. If \code{self_placements} was provided, additionally contains estimated respondent ideal points. \cr
+#'    \code{respondent} \tab If \code{compute_respondent_variables} was not \code{NULL} or if \code{self_placements} was provided, a \code{data.frame} with the same number of rows as the input containing respondent displacement intercepts and weights. If \code{self_placements} was provided, additionally contains estimated respondent ideal points. \cr
 #'    \tab \cr
 #'    \code{n_input} \tab The number of respondents in the initial input. \cr
 #'    \tab \cr
